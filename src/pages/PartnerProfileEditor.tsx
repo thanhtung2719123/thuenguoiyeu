@@ -4,11 +4,9 @@ import {
     Save,
     ArrowLeft,
     User,
-    Tag,
     MapPin,
     DollarSign,
-    AlignLeft,
-    Image as ImageIcon
+    AlignLeft
 } from 'lucide-react';
 import ImageUpload from '../components/ImageUpload';
 import './PartnerProfileEditor.css';

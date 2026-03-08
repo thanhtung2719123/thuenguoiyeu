@@ -16,19 +16,19 @@ import './PartnerProfile.css';
 const MOCK_PARTNERS = [
     {
         id: 1,
-        name: 'Linh Nguyen',
+        name: 'Linh Nguyễn',
         age: 24,
         rating: 4.9,
         reviews: [
-            { id: 101, user: 'Anh Tuan', rating: 5, comment: 'Linh was a fantastic cafe buddy! Very polite and great at photography.', date: '2 days ago' },
-            { id: 102, user: 'Minh Hieu', rating: 4, comment: 'Very professional, highly recommend for social events.', date: '1 week ago' }
+            { id: 101, user: 'Anh Tuấn', rating: 5, comment: 'Linh là một người bạn đi cà phê tuyệt vời! Rất lịch sự và chụp ảnh cực đẹp.', date: '2 ngày trước' },
+            { id: 102, user: 'Minh Hiếu', rating: 4, comment: 'Rất chuyên nghiệp, rất nên đặt cho các sự kiện xã hội.', date: '1 tuần trước' }
         ],
         distance: '2.4 km',
-        price: 35,
+        price: 350000,
         imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800',
         isVerified: true,
-        bio: "Hi! I'm Linh, a freelance photographer and lifestyle blogger. I love exploring hidden cafes in Hanoi and taking beautiful photos. I'm fluent in English and can help you navigate the best social spots in the city. Looking forward to meeting you!",
-        skills: ['Cafe Buddy', 'Fluent English', 'Photography', 'Wedding Etiquette'],
+        bio: "Chào bạn! Mình là Linh, một nhiếp ảnh gia tự do và blogger phong cách sống. Mình yêu thích khám phá những quán cà phê ẩn mình ở Hà Nội và chụp những bức ảnh đẹp. Mình thông thạo tiếng Anh và có thể giúp bạn tìm những địa điểm thú vị nhất trong thành phố. Rất mong được gặp bạn!",
+        skills: ['Bạn cà phê', 'Thông thạo tiếng Anh', 'Nhiếp ảnh', 'Nghi thức đám cưới'],
         vibePhotos: [
             'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=400',
             'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400'
@@ -36,16 +36,16 @@ const MOCK_PARTNERS = [
     },
     {
         id: 2,
-        name: 'Minh Tran',
+        name: 'Minh Trần',
         age: 26,
         rating: 4.8,
         reviews: [],
         distance: '3.1 km',
-        price: 45,
+        price: 450000,
         imageUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=800',
         isVerified: true,
-        bio: "Professional guide and corporate event partner. I specialize in fine dining etiquette and local city tours.",
-        skills: ['Local Guide', 'Fine Dining', 'Driving', 'Corporate Event'],
+        bio: "Hướng dẫn viên chuyên nghiệp và đối tác sự kiện doanh nghiệp. Mình chuyên về nghi thức ăn uống cao cấp và tham quan thành phố.",
+        skills: ['Hướng dẫn địa phương', 'Ăn uống cao cấp', 'Lái xe', 'Sự kiện doanh nghiệp'],
         vibePhotos: []
     }
 ];
@@ -97,30 +97,30 @@ const PartnerProfile = () => {
                 <div className="quick-stats">
                     <div className="stat-card">
                         <ShieldCheck size={20} className="stat-icon pink" />
-                        <div className="stat-label">Identity</div>
-                        <div className="stat-value">Verified</div>
+                        <div className="stat-label">Danh tính</div>
+                        <div className="stat-value">Đã xác minh</div>
                     </div>
                     <div className="stat-card">
                         <MessageCircle size={20} className="stat-icon pink" />
-                        <div className="stat-label">Response</div>
-                        <div className="stat-value">&lt; 1 hour</div>
+                        <div className="stat-label">Phản hồi</div>
+                        <div className="stat-value">&lt; 1 giờ</div>
                     </div>
                     <div className="stat-card">
                         <Calendar size={20} className="stat-icon pink" />
-                        <div className="stat-label">Availability</div>
-                        <div className="stat-value">Today</div>
+                        <div className="stat-label">Trạng thái</div>
+                        <div className="stat-value">Sẵn sàng</div>
                     </div>
                 </div>
 
                 {/* Bio Section */}
                 <section className="profile-section">
-                    <h2 className="section-title">About Me</h2>
+                    <h2 className="section-title">Giới thiệu</h2>
                     <p className="bio-text">{partner.bio}</p>
                 </section>
 
                 {/* Skills Section */}
                 <section className="profile-section">
-                    <h2 className="section-title">Specialized Skills</h2>
+                    <h2 className="section-title">Kỹ năng chuyên môn</h2>
                     <div className="skills-grid">
                         {partner.skills.map(skill => (
                             <div key={skill} className="skill-item card">
@@ -134,7 +134,7 @@ const PartnerProfile = () => {
                 {/* Vibe Photos */}
                 {partner.vibePhotos.length > 0 && (
                     <section className="profile-section">
-                        <h2 className="section-title">Vibe Gallery</h2>
+                        <h2 className="section-title">Bộ sưu tập</h2>
                         <div className="vibe-gallery">
                             {partner.vibePhotos.map((url, idx) => (
                                 <img key={idx} src={url} alt="vibe" className="vibe-img" />
@@ -146,8 +146,8 @@ const PartnerProfile = () => {
                 {/* Reviews Section */}
                 <section className="profile-section reviews-section">
                     <div className="section-header-row">
-                        <h2 className="section-title">Reviews</h2>
-                        <button className="btn-ghost pink-text">See all</button>
+                        <h2 className="section-title">Đánh giá</h2>
+                        <button className="btn-ghost pink-text">Xem tất cả</button>
                     </div>
                     {partner.reviews.length > 0 ? (
                         <div className="reviews-list">
@@ -169,7 +169,7 @@ const PartnerProfile = () => {
                     ) : (
                         <div className="empty-reviews text-subtle">
                             <Info size={16} />
-                            No reviews yet. Be the first to book!
+                            Chưa có đánh giá nào. Hãy là người đầu tiên đặt lịch!
                         </div>
                     )}
                 </section>
@@ -178,14 +178,14 @@ const PartnerProfile = () => {
             {/* Sticky Booking Bar */}
             <div className="booking-bar glass">
                 <div className="price-info">
-                    <div className="price-amount-large">${partner.price}</div>
-                    <div className="price-label text-subtle">per hour</div>
+                    <div className="price-amount-large">{partner.price.toLocaleString('vi-VN')}₫</div>
+                    <div className="price-label text-subtle">mỗi giờ</div>
                 </div>
                 <button
                     className="btn btn-primary book-btn"
                     onClick={() => setIsBookingOpen(true)}
                 >
-                    Book Now
+                    Đặt ngay
                 </button>
             </div>
 

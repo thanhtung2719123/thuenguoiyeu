@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
+import imageCompression from 'browser-image-compression';
+import { Upload, X, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import './ImageUpload.css';
 
@@ -21,7 +22,21 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ bucket, onUploadSuccess, labe
                 throw new Error('You must select an image to upload.');
             }
 
-            const file = event.target.files[0];
+            let file = event.target.files[0];
+
+            // Auto Compression
+            const options = {
+                maxSizeMB: 1,
+                maxWidthOrHeight: 1024,
+                useWebWorker: true
+            };
+
+            try {
+                file = await imageCompression(file, options);
+            } catch (error) {
+                console.error("Compression error:", error);
+            }
+
             const fileExt = file.name.split('.').pop();
             const fileName = `${Math.random()}.${fileExt}`;
             const filePath = `${fileName}`;
@@ -31,7 +46,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ bucket, onUploadSuccess, labe
             setPreview(objectUrl);
 
             // Upload to Supabase
-            const { error: uploadError, data } = await supabase.storage
+            const { error: uploadError } = await supabase.storage
                 .from(bucket)
                 .upload(filePath, file);
 
