@@ -5,10 +5,6 @@ import {
     DollarSign,
     Clock,
     Bell,
-    MapPin,
-    Check,
-    X,
-    ChevronRight,
     Settings,
     Info
 } from 'lucide-react';
