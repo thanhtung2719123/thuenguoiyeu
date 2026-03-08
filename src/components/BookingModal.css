@@ -1,0 +1,195 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex;
+    align-items: flex-end;
+    /* Mobile style, slides up from bottom */
+    justify-content: center;
+}
+
+.booking-modal {
+    width: 100%;
+    max-width: 480px;
+    background: white;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    padding: var(--space-6);
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-5);
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.close-btn {
+    background: var(--color-background);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.partner-mini-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    background: var(--color-background);
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-5);
+}
+
+.mini-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.mini-name {
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.mini-price {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.form-section {
+    margin-bottom: var(--space-4);
+    flex: 1;
+}
+
+.input-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 14px;
+    color: var(--color-primary);
+}
+
+.booking-input {
+    width: 100%;
+    padding: 14px 14px 14px 44px;
+    border-radius: var(--radius-md);
+    border: 1px solid #E2E8F0;
+    background: #F8FAFC;
+    font-family: inherit;
+    font-size: 15px;
+}
+
+/* For fields without icons, use standard padding */
+.form-section input[type="number"] {
+    padding-left: 14px;
+}
+
+.form-row {
+    display: flex;
+    gap: var(--space-3);
+}
+
+.escrow-notice {
+    background: rgba(255, 128, 171, 0.05);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 128, 171, 0.1);
+    margin-bottom: var(--space-5);
+}
+
+.escrow-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.escrow-title {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.escrow-text {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    line-height: 1.4;
+}
+
+.payment-summary {
+    background: var(--color-background);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-6);
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.summary-row.total {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #CBD5E1;
+    font-weight: 800;
+    font-size: 16px;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.confirm-btn {
+    height: 56px;
+    font-size: 17px;
+    border-radius: 16px;
+    gap: 12px;
+}

@@ -1,0 +1,80 @@
+.category-section {
+    margin-bottom: var(--space-6);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-3);
+    padding: 0 var(--space-4);
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.see-all-btn {
+    font-size: 13px;
+    color: var(--color-primary);
+    font-weight: 600;
+    padding: 4px 8px;
+}
+
+.category-scroll {
+    display: flex;
+    gap: var(--space-3);
+    overflow-x: auto;
+    padding: var(--space-2) var(--space-4);
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+    /* Snapping for better UX on mobile */
+    scroll-snap-type: x mandatory;
+}
+
+.category-scroll::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+}
+
+.category-pill {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 80px;
+    padding: var(--space-3) var(--space-2);
+    border: none;
+    background: var(--color-white);
+    cursor: pointer;
+    scroll-snap-align: start;
+}
+
+.category-pill:active {
+    transform: scale(0.95);
+}
+
+.icon-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.category-pill:hover .icon-circle {
+    transform: scale(1.05);
+}
+
+.category-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text);
+    white-space: nowrap;
+}
