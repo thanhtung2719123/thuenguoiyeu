@@ -1,29 +1,41 @@
--- Supabase SQL Schema for Rent-a-Date
+-- Supabase SQL Schema for Rent-a-Date (Production Ready)
 
--- Partners Table
-CREATE TABLE partners (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name TEXT NOT NULL,
+-- Profiles Table (Base for all users)
+CREATE TABLE profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
+  display_name TEXT,
   avatar_url TEXT,
+  bio TEXT,
+  email TEXT,
+  balance DECIMAL(15,2) DEFAULT 0,
+  is_partner BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Partners Table (Extension for partner users)
+CREATE TABLE partners (
+  id UUID PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
+  category TEXT,
   rating DECIMAL(3,2) DEFAULT 0,
   review_count INTEGER DEFAULT 0,
-  bio TEXT,
   skills TEXT[] DEFAULT '{}',
   location TEXT,
-  price_per_hour DECIMAL(10,2),
+  price_per_hour DECIMAL(15,2),
   is_online BOOLEAN DEFAULT false,
+  availability_status TEXT DEFAULT 'available', -- available, busy, offline
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Bookings Table
 CREATE TABLE bookings (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  renter_id UUID NOT NULL, -- Link to Auth User
+  renter_id UUID REFERENCES profiles(id),
   partner_id UUID REFERENCES partners(id),
   event_date DATE NOT NULL,
   start_time TIME NOT NULL,
   duration_hours INTEGER NOT NULL,
-  total_price DECIMAL(10,2) NOT NULL,
+  total_price DECIMAL(15,2) NOT NULL,
   status TEXT DEFAULT 'pending', -- pending, confirmed, completed, cancelled
   escrow_status TEXT DEFAULT 'hold', -- hold, released, refunded
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -32,22 +44,35 @@ CREATE TABLE bookings (
 -- Messages Table
 CREATE TABLE messages (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  booking_id UUID REFERENCES bookings(id),
-  sender_id UUID NOT NULL,
+  sender_id UUID REFERENCES profiles(id),
+  receiver_id UUID REFERENCES profiles(id),
   content TEXT NOT NULL,
+  is_read BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Initial Mock Data
-INSERT INTO partners (name, avatar_url, rating, review_count, bio, skills, location, price_per_hour, is_online)
-VALUES 
-('Linh Nguyen', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200', 4.9, 128, 'Friendly and outgoing. Love cafe hopping and deep conversations.', ARRAY['Cafe Buddy', 'Movie Partner', 'Photography'], 'Hanoi', 35.00, true),
-('Minh Hoang', 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=200', 4.8, 92, 'Expert tour guide for local spots. Can drive and speak English fluently.', ARRAY['Tour Guide', 'Driving', 'Fluent English'], 'HCMC', 45.00, false);
+-- Transactions Table (Wallet History)
+CREATE TABLE transactions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES profiles(id),
+  amount DECIMAL(15,2) NOT NULL,
+  type TEXT NOT NULL, -- deposit, withdrawal, payment, earning
+  description TEXT,
+  status TEXT DEFAULT 'completed',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
-/* 
-  SUPABASE STORAGE SETUP:
-  1. Go to Storage in Supabase Dashboard.
-  2. Create a new bucket named 'avatars' (set to Public).
-  3. Create a new bucket named 'galleries' (set to Public).
-  4. Add RLS policies to allow authenticated users to upload to their own folders.
-*/
+-- Enable Row Level Security (RLS)
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE partners ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
+
+-- Basic Policies (Public read for partners, private for everything else)
+CREATE POLICY "Partners are viewable by everyone" ON partners FOR SELECT USING (true);
+CREATE POLICY "Profiles are viewable by everyone" ON profiles FOR SELECT USING (true);
+CREATE POLICY "Users can update their own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Users can see their own bookings" ON bookings FOR SELECT USING (auth.uid() = renter_id OR auth.uid() = (SELECT id FROM partners WHERE id = partner_id));
+CREATE POLICY "Users can see their own messages" ON messages FOR SELECT USING (auth.uid() = sender_id OR auth.uid() = receiver_id);
+CREATE POLICY "Users can see their own transactions" ON transactions FOR SELECT USING (auth.uid() = user_id);

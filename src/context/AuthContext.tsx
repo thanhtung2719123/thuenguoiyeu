@@ -6,6 +6,7 @@ import {
     User
 } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 
 interface AuthContextType {
     user: User | null;
@@ -30,7 +31,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const signInWithGoogle = async () => {
         try {
-            await signInWithPopup(auth, googleProvider);
+            const result = await signInWithPopup(auth, googleProvider);
+            const user = result.user;
+
+            // Sync with Supabase profiles
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .upsert({
+                    id: user.uid,
+                    display_name: user.displayName,
+                    avatar_url: user.photoURL,
+                    email: user.email,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'id' });
+
+            if (profileError) {
+                console.error("Error syncing profile to Supabase", profileError);
+            }
         } catch (error) {
             console.error("Error signing in with Google", error);
         }

@@ -56,11 +56,27 @@
     gap: var(--space-5);
 }
 
-/* Tablet + Desktop Sim */
-@media (min-width: 400px) {
+/* Mobile Large / Tablet */
+@media (min-width: 480px) {
     .partners-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: var(--space-4);
+    }
+}
+
+/* Desktop Small */
+@media (min-width: 768px) {
+    .partners-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-6);
+    }
+}
+
+/* Desktop Full */
+@media (min-width: 1024px) {
+    .partners-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--space-6);
     }
 }
 

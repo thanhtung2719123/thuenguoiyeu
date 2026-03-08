@@ -28,26 +28,56 @@ const AppLayout = () => {
 
     return (
         <div className="app-container">
-            {/* Header Area */}
-            <header className="app-header glass">
-                <div className="header-content">
+            {/* Desktop Sidebar */}
+            <aside className="sidebar desktop-only glass">
+                <div className="sidebar-header">
                     <h1 className="header-title">
                         {isPartnerMode ? (
-                            <span className="gradient-text-alt">Trung tâm Đối tác</span>
+                            <span className="gradient-text-alt">Đối tác</span>
                         ) : (
                             <span className="gradient-text">Thuê người yêu</span>
                         )}
                     </h1>
                 </div>
-            </header>
+                <nav className="sidebar-nav">
+                    {navItems.map(({ path, icon: Icon, label }) => {
+                        const isActive = location.pathname === path;
+                        return (
+                            <button
+                                key={path}
+                                className={`sidebar-btn ${isActive ? 'active' : ''}`}
+                                onClick={() => navigate(path)}
+                            >
+                                <Icon size={20} />
+                                <span>{label}</span>
+                            </button>
+                        );
+                    })}
+                </nav>
+            </aside>
 
-            {/* Main Content Area */}
-            <main className="app-main pb-nav">
-                <Outlet />
-            </main>
+            <div className="main-wrapper">
+                {/* Header Area (Mobile Only) */}
+                <header className="app-header glass mobile-only">
+                    <div className="header-content">
+                        <h1 className="header-title">
+                            {isPartnerMode ? (
+                                <span className="gradient-text-alt">Trung tâm Đối tác</span>
+                            ) : (
+                                <span className="gradient-text">Thuê người yêu</span>
+                            )}
+                        </h1>
+                    </div>
+                </header>
 
-            {/* Bottom Navigation */}
-            <nav className="bottom-nav glass">
+                {/* Main Content Area */}
+                <main className="app-main">
+                    <Outlet />
+                </main>
+            </div>
+
+            {/* Bottom Navigation (Mobile Only) */}
+            <nav className="bottom-nav glass mobile-only">
                 <div className="nav-items">
                     {navItems.map(({ path, icon: Icon, label }) => {
                         const isActive = location.pathname === path;

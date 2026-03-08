@@ -5,6 +5,7 @@ import PartnerProfile from './pages/PartnerProfile';
 import Bookings from './pages/Bookings';
 import Inbox from './pages/Inbox';
 import Profile from './pages/Profile';
+import TransactionHistory from './pages/TransactionHistory';
 import PartnerDashboard from './pages/PartnerDashboard';
 import PartnerSchedule from './pages/PartnerSchedule';
 import PartnerProfileEditor from './pages/PartnerProfileEditor';
@@ -28,6 +29,7 @@ function App() {
               <Route path="/bookings" element={<Bookings />} />
               <Route path="/inbox" element={<Inbox />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/transaction-history" element={<TransactionHistory />} />
 
               {/* Detailed Views */}
               <Route path="/partner/:id" element={<PartnerProfile />} />

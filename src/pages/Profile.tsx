@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePartner } from '../context/PartnerContext';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 import {
     Wallet,
     ShieldCheck,
@@ -11,14 +13,41 @@ import {
     History,
     Repeat,
     CreditCard,
-    LogIn
+    LogIn,
+    Camera
 } from 'lucide-react';
 import './Profile.css';
 
 const Profile = () => {
     const { isPartnerMode, togglePartnerMode } = usePartner();
     const { user, logout, signInWithGoogle } = useAuth();
+    const [profile, setProfile] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!user) return;
+
+        const fetchProfile = async () => {
+            try {
+                setLoading(true);
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.uid)
+                    .single();
+
+                if (error) throw error;
+                if (data) setProfile(data);
+            } catch (err) {
+                console.error('Error fetching profile:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProfile();
+    }, [user]);
 
     const handleSwitchMode = () => {
         togglePartnerMode();
@@ -49,6 +78,18 @@ const Profile = () => {
         );
     }
 
+    if (loading) {
+        return (
+            <div className="profile-settings-page">
+                <div className="profile-padding">
+                    <div className="loading-state">
+                        <p className="text-subtle">Đang tải thông tin...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="profile-settings-page">
             <div className="profile-padding">
@@ -57,18 +98,21 @@ const Profile = () => {
                 {/* User Card */}
                 <div className="user-profile-card card glass">
                     <div className="user-avatar-box">
-                        <img src={user.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200"} alt="user" className="user-large-avatar" />
+                        <img src={profile?.avatar_url || user.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200"} alt="user" className="user-large-avatar" />
                         <div className="edit-badge">
-                            <Settings size={14} />
+                            <Camera size={14} />
                         </div>
                     </div>
                     <div className="user-main-info">
-                        <h2 className="user-display-name">{user.displayName || 'Người dùng'}</h2>
+                        <h2 className="user-display-name">{profile?.display_name || user.displayName || 'Người dùng'}</h2>
                         <div className="verification-status verified">
                             <ShieldCheck size={14} />
                             Đã xác minh danh tính (e-KYC)
                         </div>
                     </div>
+                    <button className="btn-icon btn-ghost ml-auto">
+                        <Settings size={20} className="text-subtle" />
+                    </button>
                 </div>
 
                 {/* Wallet Section */}
@@ -79,23 +123,23 @@ const Profile = () => {
                             <span className="wallet-label">Số dư hiện tại</span>
                             <Wallet size={20} />
                         </div>
-                        <div className="balance-amount">3.000.000₫</div>
+                        <div className="balance-amount">{Number(profile?.balance || 0).toLocaleString('vi-VN')}₫</div>
                         <div className="wallet-footer">
-                            <span className="masked-card">•••• 4242</span>
+                            <span className="masked-card">Mã ví: {user.uid.substring(0, 8).toUpperCase()}</span>
                             <button className="top-up-btn">Nạp tiền</button>
                         </div>
                     </div>
 
                     <div className="settings-list card">
-                        <div className="settings-item">
+                        <div className="settings-item" onClick={() => navigate('/transaction-history')}>
                             <div className="settings-icon-box blue"><History size={18} /></div>
                             <span className="settings-label">Lịch sử giao dịch</span>
                             <ChevronRight size={18} className="text-subtle" />
                         </div>
                         <div className="settings-item">
                             <div className="settings-icon-box orange"><CreditCard size={18} /></div>
-                            <span className="settings-label">Tài khoản liên kết (MoMo)</span>
-                            <span className="settings-value">Đã kết nối</span>
+                            <span className="settings-label">Tài khoản liên kết</span>
+                            <span className="settings-value">Tự động</span>
                             <ChevronRight size={18} className="text-subtle" />
                         </div>
                     </div>

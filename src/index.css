@@ -6,10 +6,13 @@
   --color-primary-dark: #F48FB1;
   --color-primary-light: #FFB2CB;
   --color-white: #FFFFFF;
-  --color-background: #F8F9FB; /* Very light cool grey for contrast against pure white cards */
-  --color-text: #1E293B; /* Slate 800 */
-  --color-text-muted: #64748B; /* Slate 500 */
-  
+  --color-background: #F8F9FB;
+  /* Very light cool grey for contrast against pure white cards */
+  --color-text: #1E293B;
+  /* Slate 800 */
+  --color-text-muted: #64748B;
+  /* Slate 500 */
+
   /* Status Colors */
   --color-success: #10B981;
   --color-warning: #F59E0B;
@@ -17,7 +20,7 @@
 
   /* Gradients */
   --gradient-primary: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
-  
+
   /* Effects */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -60,35 +63,55 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* App Container (Mobile Simulator style on Desktop) */
+/* App Container */
 #root {
   width: 100%;
   min-height: 100vh;
-  display: flex;
-  justify-content: center;
 }
 
 .app-container {
   width: 100%;
-  max-width: 480px; /* Mobile width constraint */
+  max-width: 1200px;
+  /* Desktop width constraint */
+  margin: 0 auto;
   min-height: 100vh;
   background-color: var(--color-white);
-  box-shadow: var(--shadow-2xl);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.03);
   position: relative;
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
 }
 
+/* For truly large screens, keep the app centered with a subtle background */
+@media (min-width: 1200px) {
+  body {
+    background-color: #f0f2f5;
+  }
+}
+
 /* Typography */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: 700;
   line-height: 1.2;
 }
 
-h1 { font-size: 24px; }
-h2 { font-size: 20px; }
-h3 { font-size: 18px; }
+h1 {
+  font-size: 24px;
+}
+
+h2 {
+  font-size: 20px;
+}
+
+h3 {
+  font-size: 18px;
+}
 
 p {
   font-size: 14px;
@@ -164,7 +187,7 @@ p {
   border-radius: var(--radius-lg);
   padding: var(--space-4);
   box-shadow: var(--shadow-sm);
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   transition: box-shadow var(--transition-normal);
 }
 

@@ -32,8 +32,8 @@
 
 .edit-badge {
     position: absolute;
-    bottom: 0;
-    right: 0;
+    bottom: 0px;
+    right: 0px;
     background: var(--color-primary);
     color: white;
     width: 28px;
@@ -43,6 +43,17 @@
     align-items: center;
     justify-content: center;
     border: 2px solid white;
+    box-shadow: var(--shadow-md);
+    cursor: pointer;
+    transition: transform var(--transition-fast);
+}
+
+.edit-badge:hover {
+    transform: scale(1.1);
+}
+
+.ml-auto {
+    margin-left: auto;
 }
 
 .user-display-name {
