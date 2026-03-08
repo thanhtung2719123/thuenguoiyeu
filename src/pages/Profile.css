@@ -1,0 +1,227 @@
+.profile-settings-page {
+    padding-top: var(--space-4);
+    background: var(--color-background);
+    min-height: 100vh;
+}
+
+.profile-padding {
+    padding: 0 var(--space-5);
+}
+
+.user-profile-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    padding: var(--space-5);
+    margin-bottom: var(--space-8);
+    border: none;
+}
+
+.user-avatar-box {
+    position: relative;
+}
+
+.user-large-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid white;
+    box-shadow: var(--shadow-md);
+}
+
+.edit-badge {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: var(--color-primary);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+}
+
+.user-display-name {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.verification-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.verification-status.verified {
+    color: var(--color-success);
+}
+
+/* Wallet */
+.settings-section {
+    margin-bottom: var(--space-8);
+}
+
+.wallet-card {
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
+    color: white;
+    margin-bottom: var(--space-4);
+    box-shadow: var(--shadow-pink);
+}
+
+.wallet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    opacity: 0.9;
+    margin-bottom: 12px;
+}
+
+.wallet-label {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.balance-amount {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: var(--space-4);
+}
+
+.wallet-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--space-4);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.masked-card {
+    font-size: 14px;
+    font-family: monospace;
+    opacity: 0.9;
+}
+
+.top-up-btn {
+    background: white;
+    color: var(--color-primary);
+    border: none;
+    padding: 6px 16px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* List Items */
+.settings-list {
+    padding: 0 var(--space-4);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.settings-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid #F1F5F9;
+    cursor: pointer;
+}
+
+.settings-item:last-child {
+    border-bottom: none;
+}
+
+.settings-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.settings-icon-box.blue {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3B82F6;
+}
+
+.settings-icon-box.orange {
+    background: rgba(249, 115, 22, 0.1);
+    color: #F97316;
+}
+
+.settings-icon-box.purple {
+    background: rgba(167, 139, 250, 0.1);
+    color: #A78BFA;
+}
+
+.settings-icon-box.pink {
+    background: rgba(244, 114, 182, 0.1);
+    color: #F472B6;
+}
+
+.settings-icon-box.green {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+}
+
+.settings-icon-box.red {
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+}
+
+.settings-label {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.settings-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+
+/* Mode Switcher */
+.mode-switch-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-4);
+    border: 1px solid var(--color-primary-light);
+    background: rgba(255, 128, 171, 0.03);
+}
+
+.mode-info {
+    display: flex;
+    gap: var(--space-4);
+    align-items: center;
+}
+
+.mode-name {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.mode-desc {
+    font-size: 12px;
+}
+
+.switch-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+}
+
+.logout {
+    color: var(--color-error);
+}

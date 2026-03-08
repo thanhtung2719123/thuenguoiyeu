@@ -1,0 +1,89 @@
+.app-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    padding: var(--space-4) var(--space-5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom-left-radius: var(--radius-md);
+    border-bottom-right-radius: var(--radius-md);
+}
+
+.header-title {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    max-width: 480px;
+    /* Constrain to mobile app container width */
+    height: var(--nav-height);
+    border-top-left-radius: var(--radius-lg);
+    border-top-right-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    padding: 0 var(--space-4);
+    padding-bottom: env(safe-area-inset-bottom);
+    /* iOS support */
+    z-index: 50;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.nav-items {
+    display: flex;
+    width: 100%;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #94A3B8;
+    /* Muted icon state */
+    transition: all var(--transition-fast);
+    padding: 8px;
+    flex: 1;
+}
+
+.icon-wrapper {
+    position: relative;
+    transition: transform var(--transition-fast);
+}
+
+.nav-btn.active {
+    color: var(--color-primary);
+}
+
+.nav-btn.active .icon-wrapper {
+    transform: translateY(-2px);
+}
+
+.nav-label {
+    font-size: 11px;
+    font-weight: 600;
+    font-family: inherit;
+}
+
+.active-dot {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+}

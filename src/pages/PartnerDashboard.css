@@ -1,0 +1,271 @@
+.partner-dashboard {
+    padding-top: var(--space-4);
+    background: var(--color-background);
+    min-height: 100vh;
+}
+
+.dashboard-padding {
+    padding: 0 var(--space-5);
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-8);
+}
+
+.status-toggle-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.status-text {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-text.online {
+    color: var(--color-success);
+}
+
+.status-text.offline {
+    color: var(--color-text-muted);
+}
+
+.toggle-switch {
+    width: 52px;
+    height: 28px;
+    background: #E2E8F0;
+    border-radius: 14px;
+    border: none;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.toggle-switch.on {
+    background: var(--color-success);
+}
+
+.toggle-handle {
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.on .toggle-handle {
+    left: 28px;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+    margin-bottom: var(--space-8);
+}
+
+.stat-card {
+    padding: var(--space-4) var(--space-2);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.stat-icon-bg {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+
+.stat-icon-bg.green {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+}
+
+.stat-icon-bg.blue {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3B82F6;
+}
+
+.stat-icon-bg.purple {
+    background: rgba(167, 139, 250, 0.1);
+    color: #A78BFA;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--color-text);
+}
+
+.stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--color-text-muted);
+}
+
+/* Sections */
+.dashboard-section {
+    margin-bottom: var(--space-8);
+}
+
+.requests-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.request-card {
+    padding: var(--space-5);
+    border: 1px solid var(--color-primary-light);
+    background: rgba(255, 128, 171, 0.02);
+}
+
+.request-user {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.request-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.request-main-info {
+    flex: 1;
+}
+
+.request-user-name {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.request-purpose {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.request-price {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--color-text);
+}
+
+.request-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: var(--space-5);
+    background: var(--color-background);
+    padding: 12px;
+    border-radius: var(--radius-md);
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+
+.request-actions {
+    display: flex;
+    gap: var(--space-3);
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.accept-btn {
+    gap: 8px;
+    height: 44px;
+}
+
+.decline-btn {
+    gap: 8px;
+    height: 44px;
+    border-color: #CBD5E1;
+    color: var(--color-text-muted);
+}
+
+/* Schedule */
+.schedule-list {
+    padding: 0 var(--space-4);
+}
+
+.schedule-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.schedule-item:last-child {
+    border-bottom: none;
+}
+
+.schedule-date {
+    width: 44px;
+    height: 50px;
+    background: var(--color-background);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.schedule-date .day {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--color-primary);
+}
+
+.schedule-date .month {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+}
+
+.schedule-info {
+    flex: 1;
+}
+
+.schedule-title {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.schedule-time {
+    font-size: 12px;
+    font-weight: 600;
+}
