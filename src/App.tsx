@@ -7,6 +7,7 @@ import Inbox from './pages/Inbox';
 import Profile from './pages/Profile';
 import PartnerDashboard from './pages/PartnerDashboard';
 import PartnerSchedule from './pages/PartnerSchedule';
+import PartnerProfileEditor from './pages/PartnerProfileEditor';
 import EmptyPage from './pages/EmptyPage';
 
 import { PartnerProvider } from './context/PartnerContext';
@@ -28,6 +29,7 @@ function App() {
             <Route path="/partner-dashboard" element={<PartnerDashboard />} />
             <Route path="/partner-schedule" element={<PartnerSchedule />} />
             <Route path="/partner-inbox" element={<EmptyPage title="Partner Messages" />} />
+            <Route path="/partner-profile-edit" element={<PartnerProfileEditor />} />
           </Route>
 
           {/* Catch-all */}

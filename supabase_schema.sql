@@ -43,3 +43,11 @@ INSERT INTO partners (name, avatar_url, rating, review_count, bio, skills, locat
 VALUES 
 ('Linh Nguyen', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200', 4.9, 128, 'Friendly and outgoing. Love cafe hopping and deep conversations.', ARRAY['Cafe Buddy', 'Movie Partner', 'Photography'], 'Hanoi', 35.00, true),
 ('Minh Hoang', 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=200', 4.8, 92, 'Expert tour guide for local spots. Can drive and speak English fluently.', ARRAY['Tour Guide', 'Driving', 'Fluent English'], 'HCMC', 45.00, false);
+
+/* 
+  SUPABASE STORAGE SETUP:
+  1. Go to Storage in Supabase Dashboard.
+  2. Create a new bucket named 'avatars' (set to Public).
+  3. Create a new bucket named 'galleries' (set to Public).
+  4. Add RLS policies to allow authenticated users to upload to their own folders.
+*/

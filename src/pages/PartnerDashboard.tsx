@@ -8,8 +8,10 @@ import {
     MapPin,
     Check,
     X,
-    ChevronRight
+    ChevronRight,
+    Settings
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import './PartnerDashboard.css';
 
 const MOCK_REQUESTS = [
@@ -27,26 +29,34 @@ const MOCK_REQUESTS = [
 
 const PartnerDashboard = () => {
     const [isOnline, setIsOnline] = useState(true);
+    const navigate = useNavigate();
 
     return (
         <div className="partner-dashboard">
             <div className="dashboard-padding">
                 <header className="dashboard-header">
-                    <div>
+                    <div className="header-left">
                         <h1 className="page-title">Partner Dashboard</h1>
                         <p className="text-subtle">Welcome back, Linh!</p>
                     </div>
-                    <div className="status-toggle-container">
-                        <span className={`status-text ${isOnline ? 'online' : 'offline'}`}>
-                            {isOnline ? 'Active' : 'Offline'}
-                        </span>
+                    <div className="header-actions">
                         <button
-                            className={`toggle-switch ${isOnline ? 'on' : 'off'}`}
-                            onClick={() => setIsOnline(!isOnline)}
+                            className="icon-btn-outline"
+                            onClick={() => navigate('/partner-profile-edit')}
                         >
-                            <div className="toggle-handle" />
+                            <Settings size={20} />
                         </button>
-                    </div>
+                        <div className="status-toggle-container">
+                            <span className={`status-text ${isOnline ? 'online' : 'offline'}`}>
+                                {isOnline ? 'Active' : 'Offline'}
+                            </span>
+                            <button
+                                className={`toggle-switch ${isOnline ? 'on' : 'off'}`}
+                                onClick={() => setIsOnline(!isOnline)}
+                            >
+                                <div className="toggle-handle" />
+                            </button>
+                        </div>
                 </header>
 
                 {/* Stats Grid */}

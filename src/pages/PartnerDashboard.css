@@ -15,6 +15,25 @@
     margin-bottom: var(--space-8);
 }
 
+.header-actions {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.icon-btn-outline {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid #E2E8F0;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--color-text-muted);
+}
+
 .status-toggle-container {
     display: flex;
     flex-direction: column;
