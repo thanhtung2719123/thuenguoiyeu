@@ -1,5 +1,6 @@
+import { useState } from 'react';
+import { Search, Send, ShieldCheck, MoreVertical, LogIn } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { LogIn } from 'lucide-react';
 import './Inbox.css';
 
 const MOCK_CHATS = [

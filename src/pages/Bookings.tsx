@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Clock, CheckCircle, Hourglass, CreditCard, ChevronRight, Info, LogIn } from 'lucide-react';
 import './Bookings.css';
