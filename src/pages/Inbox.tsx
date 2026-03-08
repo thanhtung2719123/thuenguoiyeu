@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Search, Send, ShieldCheck, MoreVertical } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { LogIn } from 'lucide-react';
 import './Inbox.css';
 
 const MOCK_CHATS = [
@@ -24,7 +24,28 @@ const MOCK_CHATS = [
 ];
 
 const Inbox = () => {
+    const { user, signInWithGoogle } = useAuth();
     const [selectedChat, setSelectedChat] = useState<any>(null);
+
+    if (!user) {
+        return (
+            <div className="inbox-page">
+                <div className="inbox-padding">
+                    <h1 className="page-title">Tin nhắn</h1>
+                    <div className="card glass auth-prompt-card">
+                        <div className="auth-icon-bg">
+                            <LogIn size={48} className="pink-text" />
+                        </div>
+                        <h2>Bạn chưa đăng nhập</h2>
+                        <p className="text-subtle">Vui lòng đăng nhập để xem tin nhắn và trò chuyện.</p>
+                        <button className="btn btn-primary w-full" onClick={signInWithGoogle}>
+                            Đăng nhập với Google
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (selectedChat) {
         return (
@@ -79,7 +100,7 @@ const Inbox = () => {
     return (
         <div className="inbox-page">
             <div className="inbox-padding">
-                <h1 className="page-title">Messages</h1>
+                <h1 className="page-title">Tin nhắn</h1>
 
                 <div className="search-bar-mini card glass">
                     <Search size={18} className="text-subtle" />

@@ -34,8 +34,8 @@ const ProfileCard = ({
             <div className="profile-image-wrapper">
                 <img src={imageUrl} alt={name} className="profile-image" />
                 <div className="price-badge glass">
-                    <span className="price-amount">${price}</span>
-                    <span className="price-unit">/hr</span>
+                    <span className="price-amount">{price.toLocaleString('vi-VN')}₫</span>
+                    <span className="price-unit">/giờ</span>
                 </div>
                 <button className="favorite-btn glass">
                     <Star size={18} />
@@ -57,7 +57,7 @@ const ProfileCard = ({
 
                 <div className="profile-location text-subtle">
                     <MapPin size={14} />
-                    {distance} away
+                    {distance}
                 </div>
 
                 <div className="profile-tags">

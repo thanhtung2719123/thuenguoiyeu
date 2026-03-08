@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { usePartner } from '../context/PartnerContext';
+import { useAuth } from '../context/AuthContext';
 import {
     Wallet,
     ShieldCheck,
@@ -9,12 +10,14 @@ import {
     HelpCircle,
     History,
     Repeat,
-    CreditCard
+    CreditCard,
+    LogIn
 } from 'lucide-react';
 import './Profile.css';
 
 const Profile = () => {
     const { isPartnerMode, togglePartnerMode } = usePartner();
+    const { user, logout, signInWithGoogle } = useAuth();
     const navigate = useNavigate();
 
     const handleSwitchMode = () => {
@@ -25,6 +28,27 @@ const Profile = () => {
             navigate('/');
         }
     };
+
+    if (!user) {
+        return (
+            <div className="profile-settings-page">
+                <div className="profile-padding">
+                    <h1 className="page-title">Cá nhân</h1>
+                    <div className="card glass auth-prompt-card">
+                        <div className="auth-icon-bg">
+                            <LogIn size={48} className="pink-text" />
+                        </div>
+                        <h2>Bạn chưa đăng nhập</h2>
+                        <p className="text-subtle">Đăng nhập ngay để theo dõi các đơn đặt và quản lý tài khoản.</p>
+                        <button className="btn btn-primary w-full" onClick={signInWithGoogle}>
+                            Đăng nhập với Google
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="profile-settings-page">
             <div className="profile-padding">
@@ -33,13 +57,13 @@ const Profile = () => {
                 {/* User Card */}
                 <div className="user-profile-card card glass">
                     <div className="user-avatar-box">
-                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200" alt="user" className="user-large-avatar" />
+                        <img src={user.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200"} alt="user" className="user-large-avatar" />
                         <div className="edit-badge">
                             <Settings size={14} />
                         </div>
                     </div>
                     <div className="user-main-info">
-                        <h2 className="user-display-name">Alex Johnson</h2>
+                        <h2 className="user-display-name">{user.displayName || 'Người dùng'}</h2>
                         <div className="verification-status verified">
                             <ShieldCheck size={14} />
                             Đã xác minh danh tính (e-KYC)
@@ -113,7 +137,7 @@ const Profile = () => {
                             <span className="settings-label">Hỗ trợ & An toàn</span>
                             <ChevronRight size={18} className="text-subtle" />
                         </div>
-                        <div className="settings-item logout">
+                        <div className="settings-item logout" onClick={logout}>
                             <div className="settings-icon-box red"><LogOut size={18} /></div>
                             <span className="settings-label">Đăng xuất</span>
                         </div>

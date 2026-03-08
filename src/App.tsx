@@ -11,31 +11,37 @@ import PartnerProfileEditor from './pages/PartnerProfileEditor';
 import EmptyPage from './pages/EmptyPage';
 
 import { PartnerProvider } from './context/PartnerContext';
+import { AuthProvider } from './context/AuthContext';
+import Login from './pages/Login';
 
 function App() {
   return (
     <BrowserRouter>
-      <PartnerProvider>
-        <Routes>
-          <Route element={<AppLayout />}>
-            {/* Main Tab Routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/bookings" element={<Bookings />} />
-            <Route path="/inbox" element={<Inbox />} />
-            <Route path="/profile" element={<Profile />} />
+      <AuthProvider>
+        <PartnerProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
 
-            {/* Detailed Views */}
-            <Route path="/partner/:id" element={<PartnerProfile />} />
-            <Route path="/partner-dashboard" element={<PartnerDashboard />} />
-            <Route path="/partner-schedule" element={<PartnerSchedule />} />
-            <Route path="/partner-inbox" element={<EmptyPage title="Partner Messages" />} />
-            <Route path="/partner-profile-edit" element={<PartnerProfileEditor />} />
-          </Route>
+            <Route element={<AppLayout />}>
+              {/* Main Tab Routes */}
+              <Route path="/" element={<Home />} />
+              <Route path="/bookings" element={<Bookings />} />
+              <Route path="/inbox" element={<Inbox />} />
+              <Route path="/profile" element={<Profile />} />
 
-          {/* Catch-all */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </PartnerProvider>
+              {/* Detailed Views */}
+              <Route path="/partner/:id" element={<PartnerProfile />} />
+              <Route path="/partner-dashboard" element={<PartnerDashboard />} />
+              <Route path="/partner-schedule" element={<PartnerSchedule />} />
+              <Route path="/partner-inbox" element={<EmptyPage title="Partner Messages" />} />
+              <Route path="/partner-profile-edit" element={<PartnerProfileEditor />} />
+            </Route>
+
+            {/* Catch-all */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </PartnerProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

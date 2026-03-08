@@ -12,13 +12,13 @@ const SearchBar = () => {
                 <input
                     type="text"
                     className="search-input"
-                    placeholder="Find your perfect companion..."
+                    placeholder="Tìm người bạn đồng hành..."
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                 />
                 <button className="location-btn text-subtle">
                     <MapPin size={16} />
-                    Hanoi
+                    Hà Nội
                 </button>
             </div>
             <button className="filter-btn btn-primary">

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Clock, CheckCircle, Hourglass, CreditCard, ChevronRight, Info } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Clock, CheckCircle, Hourglass, CreditCard, ChevronRight, Info, LogIn } from 'lucide-react';
 import './Bookings.css';
 
 const MOCK_BOOKINGS = [
@@ -28,7 +28,28 @@ const MOCK_BOOKINGS = [
 ];
 
 const Bookings = () => {
+    const { user, signInWithGoogle } = useAuth();
     const [activeTab, setActiveTab] = useState('Sắp tới');
+
+    if (!user) {
+        return (
+            <div className="bookings-page">
+                <div className="bookings-padding">
+                    <h1 className="page-title">Lịch đặt</h1>
+                    <div className="card glass auth-prompt-card">
+                        <div className="auth-icon-bg">
+                            <LogIn size={48} className="pink-text" />
+                        </div>
+                        <h2>Bạn chưa đăng nhập</h2>
+                        <p className="text-subtle">Vui lòng đăng nhập để theo dõi các đơn đặt của bạn.</p>
+                        <button className="btn btn-primary w-full" onClick={signInWithGoogle}>
+                            Đăng nhập với Google
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="bookings-page">
