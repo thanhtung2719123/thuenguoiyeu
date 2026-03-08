@@ -14,7 +14,8 @@ import {
     Repeat,
     CreditCard,
     LogIn,
-    Camera
+    Camera,
+    Clock
 } from 'lucide-react';
 import './Profile.css';
 
@@ -22,7 +23,9 @@ const Profile = () => {
     const { isPartnerMode, togglePartnerMode } = usePartner();
     const { user, logout, signInWithGoogle } = useAuth();
     const [profile, setProfile] = useState<any>(null);
+    const [isOnline, setIsOnline] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [isPartner, setIsPartner] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -38,7 +41,22 @@ const Profile = () => {
                     .single();
 
                 if (error) throw error;
-                if (data) setProfile(data);
+                if (data) {
+                    setProfile(data);
+                    setIsPartner(data.is_partner);
+
+                    if (data.is_partner) {
+                        const { data: partnerData } = await supabase
+                            .from('partners')
+                            .select('is_online')
+                            .eq('id', user.uid)
+                            .single();
+
+                        if (partnerData) {
+                            setIsOnline(partnerData.is_online);
+                        }
+                    }
+                }
             } catch (err) {
                 console.error('Error fetching profile:', err);
             } finally {
@@ -48,6 +66,17 @@ const Profile = () => {
 
         fetchProfile();
     }, [user]);
+
+    const handleToggleStatus = async () => {
+        const nextStatus = !isOnline;
+        setIsOnline(nextStatus);
+        if (user) {
+            await supabase
+                .from('partners')
+                .update({ is_online: nextStatus } as any)
+                .eq('id', user.uid);
+        }
+    };
 
     const handleSwitchMode = () => {
         togglePartnerMode();
@@ -151,6 +180,30 @@ const Profile = () => {
                         </div>
                     </div>
                 </section>
+
+                {/* Online Status for Partners */}
+                {isPartner && (
+                    <section className="settings-section">
+                        <h2 className="section-title">Trạng thái hoạt động</h2>
+                        <div className="mode-switch-card card">
+                            <div className="mode-info">
+                                <div className={`settings-icon-box ${isOnline ? 'green' : 'gray'}`}><Clock size={18} /></div>
+                                <div>
+                                    <div className="mode-name">{isOnline ? 'Đang rảnh' : 'Đang bận / Ngoại tuyến'}</div>
+                                    <div className="mode-desc text-subtle">
+                                        {isOnline ? 'Khách hàng có thể nhìn thấy và thuê bạn' : 'Tạm ẩn hồ sơ khỏi danh sách khám phá'}
+                                    </div>
+                                </div>
+                            </div>
+                            <button
+                                className={`toggle-switch ${isOnline ? 'on' : 'off'}`}
+                                onClick={handleToggleStatus}
+                            >
+                                <div className="toggle-handle" />
+                            </button>
+                        </div>
+                    </section>
+                )}
 
                 {/* Mode Switching */}
                 <section className="settings-section">
