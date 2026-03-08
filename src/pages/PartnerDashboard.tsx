@@ -17,13 +17,13 @@ import './PartnerDashboard.css';
 const MOCK_REQUESTS = [
     {
         id: 'R001',
-        userName: 'Anh Tuan',
+        userName: 'Anh Tuấn',
         userImage: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200',
-        purpose: 'Cafe Buddy / Photography',
-        location: 'Cong Caphe, West Lake',
-        time: 'Today, 19:30',
-        duration: '2 hours',
-        earnings: '$70',
+        purpose: 'Bạn cà phê / Chụp ảnh',
+        location: 'Cộng Cà Phê, Hồ Tây',
+        time: 'Hôm nay, 19:30',
+        duration: '2 giờ',
+        earnings: '700.000₫',
     }
 ];
 
@@ -36,8 +36,8 @@ const PartnerDashboard = () => {
             <div className="dashboard-padding">
                 <header className="dashboard-header">
                     <div className="header-left">
-                        <h1 className="page-title">Partner Dashboard</h1>
-                        <p className="text-subtle">Welcome back, Linh!</p>
+                        <h1 className="page-title">Bảng điều khiển Đối tác</h1>
+                        <p className="text-subtle">Chào mừng trở lại, Linh!</p>
                     </div>
                     <div className="header-actions">
                         <button
@@ -48,7 +48,7 @@ const PartnerDashboard = () => {
                         </button>
                         <div className="status-toggle-container">
                             <span className={`status-text ${isOnline ? 'online' : 'offline'}`}>
-                                {isOnline ? 'Active' : 'Offline'}
+                                {isOnline ? 'Đang hoạt động' : 'Ngoại tuyến'}
                             </span>
                             <button
                                 className={`toggle-switch ${isOnline ? 'on' : 'off'}`}
@@ -64,25 +64,25 @@ const PartnerDashboard = () => {
                 <div className="stats-grid">
                     <div className="stat-card card glass">
                         <div className="stat-icon-bg green"><DollarSign size={20} /></div>
-                        <div className="stat-value">$420</div>
-                        <div className="stat-label">This Week</div>
+                        <div className="stat-value">4.200.000₫</div>
+                        <div className="stat-label">Tuần này</div>
                     </div>
                     <div className="stat-card card glass">
                         <div className="stat-icon-bg blue"><Users size={20} /></div>
                         <div className="stat-value">12</div>
-                        <div className="stat-label">Total Gigs</div>
+                        <div className="stat-label">Tổng lượt đặt</div>
                     </div>
                     <div className="stat-card card glass">
                         <div className="stat-icon-bg purple"><TrendingUp size={20} /></div>
                         <div className="stat-value">4.9</div>
-                        <div className="stat-label">Rating</div>
+                        <div className="stat-label">Đánh giá</div>
                     </div>
                 </div>
 
                 {/* Incoming Requests */}
                 <section className="dashboard-section">
                     <div className="section-header-row">
-                        <h2 className="section-title">New Invitations</h2>
+                        <h2 className="section-title">Lời mời mới</h2>
                         <Bell size={20} className="pink-text" />
                     </div>
 
@@ -112,11 +112,11 @@ const PartnerDashboard = () => {
                                 <div className="request-actions">
                                     <button className="btn btn-outline flex-1 decline-btn">
                                         <X size={18} />
-                                        Decline
+                                        Từ chối
                                     </button>
                                     <button className="btn btn-primary flex-1 accept-btn">
                                         <Check size={18} />
-                                        Accept
+                                        Chấp nhận
                                     </button>
                                 </div>
                             </div>
@@ -126,15 +126,15 @@ const PartnerDashboard = () => {
 
                 {/* Upcoming Schedule */}
                 <section className="dashboard-section">
-                    <h2 className="section-title">Upcoming Schedule</h2>
+                    <h2 className="section-title">Lịch trình sắp tới</h2>
                     <div className="schedule-list card">
                         <div className="schedule-item">
                             <div className="schedule-date">
                                 <div className="day">12</div>
-                                <div className="month">Mar</div>
+                                <div className="month">Th3</div>
                             </div>
                             <div className="schedule-info">
-                                <div className="schedule-title">Movie Partner (CGV Vincom)</div>
+                                <div className="schedule-title">Bạn xem phim (CGV Vincom)</div>
                                 <div className="schedule-time text-subtle">18:00 - 21:00</div>
                             </div>
                             <ChevronRight size={18} className="text-subtle" />
@@ -142,10 +142,10 @@ const PartnerDashboard = () => {
                         <div className="schedule-item">
                             <div className="schedule-date">
                                 <div className="day">15</div>
-                                <div className="month">Mar</div>
+                                <div className="month">Th3</div>
                             </div>
                             <div className="schedule-info">
-                                <div className="schedule-title">Wedding Plus-one</div>
+                                <div className="schedule-title">Đi tiệc đám cưới</div>
                                 <div className="schedule-time text-subtle">11:00 - 15:00</div>
                             </div>
                             <ChevronRight size={18} className="text-subtle" />

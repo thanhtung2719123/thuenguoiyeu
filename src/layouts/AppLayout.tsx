@@ -10,18 +10,18 @@ const AppLayout = () => {
 
     // Renter Navigation
     const renterItems = [
-        { path: '/', icon: Home, label: 'Explore' },
-        { path: '/bookings', icon: CalendarClock, label: 'Bookings' },
-        { path: '/inbox', icon: MessageCircle, label: 'Inbox' },
-        { path: '/profile', icon: User, label: 'Profile' },
+        { path: '/', icon: Home, label: 'Khám phá' },
+        { path: '/bookings', icon: CalendarClock, label: 'Lịch đặt' },
+        { path: '/inbox', icon: MessageCircle, label: 'Tin nhắn' },
+        { path: '/profile', icon: User, label: 'Cá nhân' },
     ];
 
     // Partner Navigation
     const partnerItems = [
-        { path: '/partner-dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-        { path: '/partner-schedule', icon: CalendarClock, label: 'Schedule' },
-        { path: '/partner-inbox', icon: MessageCircle, label: 'Messages' },
-        { path: '/profile', icon: User, label: 'Account' },
+        { path: '/partner-dashboard', icon: LayoutDashboard, label: 'Bảng điều khiển' },
+        { path: '/partner-schedule', icon: CalendarClock, label: 'Lịch trình' },
+        { path: '/partner-inbox', icon: MessageCircle, label: 'Tin nhắn' },
+        { path: '/profile', icon: User, label: 'Tài khoản' },
     ];
 
     const navItems = isPartnerMode ? partnerItems : renterItems;
@@ -33,9 +33,9 @@ const AppLayout = () => {
                 <div className="header-content">
                     <h1 className="header-title">
                         {isPartnerMode ? (
-                            <span className="gradient-text-alt">Partner Hub</span>
+                            <span className="gradient-text-alt">Trung tâm Đối tác</span>
                         ) : (
-                            <span className="gradient-text">Rent-a-Date</span>
+                            <span className="gradient-text">Thuê người yêu</span>
                         )}
                     </h1>
                 </div>

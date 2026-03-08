@@ -28,7 +28,7 @@ const Profile = () => {
     return (
         <div className="profile-settings-page">
             <div className="profile-padding">
-                <h1 className="page-title">My Account</h1>
+                <h1 className="page-title">Tài khoản của tôi</h1>
 
                 {/* User Card */}
                 <div className="user-profile-card card glass">
@@ -42,36 +42,36 @@ const Profile = () => {
                         <h2 className="user-display-name">Alex Johnson</h2>
                         <div className="verification-status verified">
                             <ShieldCheck size={14} />
-                            Identity Verified (e-KYC)
+                            Đã xác minh danh tính (e-KYC)
                         </div>
                     </div>
                 </div>
 
                 {/* Wallet Section */}
                 <section className="settings-section">
-                    <h2 className="section-title">Wallet & Payments</h2>
+                    <h2 className="section-title">Ví & Thanh toán</h2>
                     <div className="wallet-card card gradient-primary">
                         <div className="wallet-header">
-                            <span className="wallet-label">Current Balance</span>
+                            <span className="wallet-label">Số dư hiện tại</span>
                             <Wallet size={20} />
                         </div>
-                        <div className="balance-amount">$120.50</div>
+                        <div className="balance-amount">3.000.000₫</div>
                         <div className="wallet-footer">
                             <span className="masked-card">•••• 4242</span>
-                            <button className="top-up-btn">Top Up</button>
+                            <button className="top-up-btn">Nạp tiền</button>
                         </div>
                     </div>
 
                     <div className="settings-list card">
                         <div className="settings-item">
                             <div className="settings-icon-box blue"><History size={18} /></div>
-                            <span className="settings-label">Transaction History</span>
+                            <span className="settings-label">Lịch sử giao dịch</span>
                             <ChevronRight size={18} className="text-subtle" />
                         </div>
                         <div className="settings-item">
                             <div className="settings-icon-box orange"><CreditCard size={18} /></div>
-                            <span className="settings-label">Linked Accounts (MoMo)</span>
-                            <span className="settings-value">Connected</span>
+                            <span className="settings-label">Tài khoản liên kết (MoMo)</span>
+                            <span className="settings-value">Đã kết nối</span>
                             <ChevronRight size={18} className="text-subtle" />
                         </div>
                     </div>
@@ -79,14 +79,14 @@ const Profile = () => {
 
                 {/* Mode Switching */}
                 <section className="settings-section">
-                    <h2 className="section-title">Account Mode</h2>
+                    <h2 className="section-title">Chế độ tài khoản</h2>
                     <div className="mode-switch-card card">
                         <div className="mode-info">
                             <div className="settings-icon-box purple"><Repeat size={18} /></div>
                             <div>
-                                <div className="mode-name">{isPartnerMode ? 'Renter Mode' : 'Partner Mode'}</div>
+                                <div className="mode-name">{isPartnerMode ? 'Chế độ Người thuê' : 'Chế độ Đối tác'}</div>
                                 <div className="mode-desc text-subtle">
-                                    {isPartnerMode ? 'Switch back to explorer mode' : 'Earn money by being a companion'}
+                                    {isPartnerMode ? 'Quay lại chế độ khám phá' : 'Kiếm tiền bằng cách làm bạn đồng hành'}
                                 </div>
                             </div>
                         </div>
@@ -94,28 +94,28 @@ const Profile = () => {
                             className="btn btn-primary btn-sm switch-btn"
                             onClick={handleSwitchMode}
                         >
-                            Switch
+                            Chuyển đổi
                         </button>
                     </div>
                 </section>
 
                 {/* General Settings */}
                 <section className="settings-section">
-                    <h2 className="section-title">General</h2>
+                    <h2 className="section-title">Cài đặt chung</h2>
                     <div className="settings-list card">
                         <div className="settings-item">
                             <div className="settings-icon-box pink"><Settings size={18} /></div>
-                            <span className="settings-label">App Settings</span>
+                            <span className="settings-label">Cài đặt ứng dụng</span>
                             <ChevronRight size={18} className="text-subtle" />
                         </div>
                         <div className="settings-item">
                             <div className="settings-icon-box green"><HelpCircle size={18} /></div>
-                            <span className="settings-label">Support & Safety</span>
+                            <span className="settings-label">Hỗ trợ & An toàn</span>
                             <ChevronRight size={18} className="text-subtle" />
                         </div>
                         <div className="settings-item logout">
                             <div className="settings-icon-box red"><LogOut size={18} /></div>
-                            <span className="settings-label">Logout</span>
+                            <span className="settings-label">Đăng xuất</span>
                         </div>
                     </div>
                 </section>

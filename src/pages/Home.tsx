@@ -1,9 +1,6 @@
-import SearchBar from '../components/SearchBar';
-import CategoryPills from '../components/CategoryPills';
-import ProfileCard from '../components/ProfileCard';
+import { Search, MapPin, Star } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import './Home.css';
-import { Search, MapPin, Star, Heart, Coffee, Compass, Music } from 'lucide-react'; // Assuming these icons are from lucide-react
-import { Link } from 'react-router-dom'; // Assuming Link is from react-router-dom
 
 const MOCK_PARTNERS = [
     {
