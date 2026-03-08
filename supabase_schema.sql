@@ -7,9 +7,13 @@ CREATE TABLE profiles (
   avatar_url TEXT,
   bio TEXT,
   location TEXT,
+  province TEXT,
+  gender TEXT,
+  birthday DATE,
   email TEXT,
   balance DECIMAL(15,2) DEFAULT 0,
   is_partner BOOLEAN DEFAULT false,
+  is_verified BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -21,11 +25,13 @@ CREATE TABLE partners (
   rating DECIMAL(3,2) DEFAULT 0,
   review_count INTEGER DEFAULT 0,
   skills TEXT[] DEFAULT '{}',
+  game_tags TEXT[] DEFAULT '{}',
   location TEXT,
   gallery TEXT[] DEFAULT '{}',
   price_per_hour DECIMAL(15,2),
   is_online BOOLEAN DEFAULT false,
   availability_status TEXT DEFAULT 'available', -- available, busy, offline
+  availability_hours JSONB DEFAULT '{}',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

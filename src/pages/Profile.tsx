@@ -105,10 +105,17 @@ const Profile = () => {
                     </div>
                     <div className="user-main-info">
                         <h2 className="user-display-name">{profile?.display_name || user.displayName || 'Người dùng'}</h2>
-                        <div className="verification-status verified">
-                            <ShieldCheck size={14} />
-                            Đã xác minh danh tính (e-KYC)
-                        </div>
+                        {profile?.is_verified ? (
+                            <div className="verification-status verified">
+                                <ShieldCheck size={14} />
+                                Đã xác minh danh tính (e-KYC)
+                            </div>
+                        ) : (
+                            <div className="verification-status unverified">
+                                <ShieldCheck size={14} className="text-subtle" />
+                                Chưa xác minh danh tính
+                            </div>
+                        )}
                     </div>
                     <button className="btn-icon btn-ghost ml-auto" onClick={() => navigate('/edit-profile')}>
                         <Settings size={20} className="text-subtle" />

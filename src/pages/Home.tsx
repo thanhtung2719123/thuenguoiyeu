@@ -15,8 +15,8 @@ const Home = () => {
                 setLoading(true);
                 const { data, error } = await supabase
                     .from('partners')
-                    .select('*, profiles!partner_id(*)')
-                    .eq('availability_status', 'available');
+                    .select('*, profiles(*)')
+                    .eq('is_online', true);
 
                 if (error) throw error;
 
@@ -24,14 +24,14 @@ const Home = () => {
                     const formattedPartners = data.map((p: any) => ({
                         id: p.id,
                         name: p.profiles?.display_name || 'Người dùng ẩn danh',
-                        age: 20,
+                        age: p.profiles?.birthday ? new Date().getFullYear() - new Date(p.profiles.birthday).getFullYear() : 20,
                         rating: Number(p.rating),
                         reviews: p.review_count,
-                        distance: p.location || 'Hà Nội',
+                        distance: p.profiles?.province || p.location || 'Hà Nội',
                         price: p.price_per_hour,
                         imageUrl: p.profiles?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800',
-                        isVerified: true,
-                        tags: p.skills || [],
+                        isVerified: p.profiles?.is_verified || false,
+                        tags: p.game_tags || [],
                     }));
                     setPartners(formattedPartners);
                 }

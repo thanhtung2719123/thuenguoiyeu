@@ -9,15 +9,27 @@ import {
     MapPin,
     DollarSign,
     AlignLeft,
-    Loader2
+    Loader2,
+    X,
+    ChevronUp,
+    ChevronDown
 } from 'lucide-react';
 import ImageUpload from '../components/ImageUpload';
 import './PartnerProfileEditor.css';
 
 const SKILL_OPTIONS = [
-    'Wedding Date', 'Cafe Buddy', 'Tour Guide', 'Family Dinner',
-    'Movie Partner', 'Photography', 'Shopping Assistant', 'Gym Buddy',
-    'Fluent English', 'Fluent Korean', 'Driving'
+    { name: 'Communication', icon: '🗣️' },
+    { name: 'Singing', icon: '🎤' },
+    { name: 'Gaming', icon: '🎮' },
+    { name: 'Movie Buddy', icon: '🍿' },
+    { name: 'Tour Guide', icon: '🗺️' },
+    { name: 'Shopping', icon: '🛍️' },
+    { name: 'Gym Buddy', icon: '💪' },
+    { name: 'Photography', icon: '📸' }
+];
+
+const PROVINCE_OPTIONS = [
+    'Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng', 'Hải Phòng', 'Cần Thơ', 'Bình Dương', 'Đồng Nai'
 ];
 
 const PartnerProfileEditor = () => {
@@ -29,8 +41,11 @@ const PartnerProfileEditor = () => {
         display_name: '',
         bio: '',
         location: '',
+        province: '',
+        gender: '',
+        birthday: '',
         price_per_hour: 0,
-        skills: [],
+        game_tags: [],
         avatar_url: '',
         gallery: []
     });
@@ -47,15 +62,18 @@ const PartnerProfileEditor = () => {
                     .eq('id', user.uid)
                     .single();
 
-                if (partnerError) throw partnerError;
+                if (partnerError && partnerError.code !== 'PGRST116') throw partnerError;
 
                 if (partnerData) {
                     setProfile({
                         display_name: partnerData.profiles?.display_name || '',
                         bio: partnerData.profiles?.bio || '',
                         location: partnerData.location || '',
+                        province: partnerData.profiles?.province || '',
+                        gender: partnerData.profiles?.gender || '',
+                        birthday: partnerData.profiles?.birthday || '',
                         price_per_hour: partnerData.price_per_hour || 0,
-                        skills: partnerData.skills || [],
+                        game_tags: partnerData.game_tags || [],
                         avatar_url: partnerData.profiles?.avatar_url || '',
                         gallery: partnerData.gallery || []
                     });
@@ -70,13 +88,30 @@ const PartnerProfileEditor = () => {
         fetchData();
     }, [user]);
 
-    const handleToggleSkill = (skill: string) => {
-        setProfile((prev: any) => ({
-            ...prev,
-            skills: prev.skills.includes(skill)
-                ? prev.skills.filter((s: string) => s !== skill)
-                : [...prev.skills, skill]
-        }));
+    const handleToggleTag = (tag: string) => {
+        setProfile((prev: any) => {
+            const isSelected = prev.game_tags.includes(tag);
+            if (!isSelected && prev.game_tags.length >= 3) {
+                alert('Bạn chỉ được chọn tối đa 3 thẻ!');
+                return prev;
+            }
+            return {
+                ...prev,
+                game_tags: isSelected
+                    ? prev.game_tags.filter((t: string) => t !== tag)
+                    : [...prev.game_tags, tag]
+            };
+        });
+    };
+
+    const handleMoveItem = (index: number, direction: 'up' | 'down') => {
+        setProfile((prev: any) => {
+            const newGallery = [...prev.gallery];
+            const targetIndex = direction === 'up' ? index - 1 : index + 1;
+            if (targetIndex < 0 || targetIndex >= newGallery.length) return prev;
+            [newGallery[index], newGallery[targetIndex]] = [newGallery[targetIndex], newGallery[index]];
+            return { ...prev, gallery: newGallery };
+        });
     };
 
     const handleSave = async () => {
@@ -85,14 +120,19 @@ const PartnerProfileEditor = () => {
             setSaving(true);
 
             // Update Profile
-            await supabase
+            const { error: profileError } = await supabase
                 .from('profiles')
                 .update({
                     display_name: profile.display_name,
                     bio: profile.bio,
-                    avatar_url: profile.avatar_url
+                    avatar_url: profile.avatar_url,
+                    province: profile.province,
+                    gender: profile.gender,
+                    birthday: profile.birthday
                 } as any)
                 .eq('id', user.uid);
+
+            if (profileError) throw profileError;
 
             // Update Partner
             const { error: partnerError } = await supabase
@@ -100,8 +140,8 @@ const PartnerProfileEditor = () => {
                 .update({
                     location: profile.location,
                     price_per_hour: profile.price_per_hour,
-                    skills: profile.skills,
-                    gallery: profile.gallery,
+                    game_tags: profile.game_tags,
+                    gallery: profile.gallery.slice(0, 15),
                     updated_at: new Date().toISOString()
                 } as any)
                 .eq('id', user.uid);
@@ -134,7 +174,7 @@ const PartnerProfileEditor = () => {
                 <button className="back-btn" onClick={() => navigate(-1)}>
                     <ArrowLeft size={20} />
                 </button>
-                <h1 className="header-title">Chỉnh sửa hồ sơ Đối tác</h1>
+                <h1 className="header-title">Chỉnh sửa hồ sơ Companion</h1>
                 <button className="save-btn pink-text" onClick={handleSave} disabled={saving}>
                     {saving ? <Loader2 className="spinner" size={20} /> : <Save size={20} />}
                     <span>Lưu</span>
@@ -167,17 +207,39 @@ const PartnerProfileEditor = () => {
                                 type="text"
                                 value={profile.display_name}
                                 onChange={e => setProfile((prev: any) => ({ ...prev, display_name: e.target.value }))}
-                                placeholder="Họ và tên"
+                                placeholder="Biệt danh"
                             />
                         </div>
                         <div className="input-item">
                             <MapPin size={18} className="input-icon" />
+                            <select
+                                value={profile.province}
+                                onChange={e => setProfile((prev: any) => ({ ...prev, province: e.target.value }))}
+                                className="province-select"
+                            >
+                                <option value="">Chọn Tỉnh/Thành</option>
+                                {PROVINCE_OPTIONS.map(p => <option key={p} value={p}>{p}</option>)}
+                            </select>
+                        </div>
+                        <div className="input-item">
                             <input
-                                type="text"
-                                value={profile.location}
-                                onChange={e => setProfile((prev: any) => ({ ...prev, location: e.target.value }))}
-                                placeholder="Vị trí (vd: Hà Nội)"
+                                type="date"
+                                value={profile.birthday}
+                                onChange={e => setProfile((prev: any) => ({ ...prev, birthday: e.target.value }))}
+                                className="date-input"
                             />
+                        </div>
+                        <div className="input-item">
+                            <select
+                                value={profile.gender}
+                                onChange={e => setProfile((prev: any) => ({ ...prev, gender: e.target.value }))}
+                                className="gender-select"
+                            >
+                                <option value="">Giới tính</option>
+                                <option value="Male">Nam</option>
+                                <option value="Female">Nữ</option>
+                                <option value="Other">Khác</option>
+                            </select>
                         </div>
                         <div className="input-item">
                             <DollarSign size={18} className="input-icon" />
@@ -192,7 +254,7 @@ const PartnerProfileEditor = () => {
                 </section>
 
                 <section className="editor-section">
-                    <h2 className="section-title">Giới thiệu bản thân</h2>
+                    <h2 className="section-title">Giới thiệu ngắn (Bio)</h2>
                     <div className="input-group card">
                         <div className="input-item multi-line">
                             <AlignLeft size={18} className="input-icon" />
@@ -207,34 +269,66 @@ const PartnerProfileEditor = () => {
                 </section>
 
                 <section className="editor-section">
-                    <h2 className="section-title">Kỹ năng & Dịch vụ</h2>
+                    <div className="section-header-between">
+                        <h2 className="section-title">Thẻ Game & Kỹ năng</h2>
+                        <span className="tag-count">{profile.game_tags.length}/3</span>
+                    </div>
                     <div className="skills-grid">
                         {SKILL_OPTIONS.map(skill => (
                             <button
-                                key={skill}
-                                className={`skill-chip ${profile.skills.includes(skill) ? 'active' : ''}`}
-                                onClick={() => handleToggleSkill(skill)}
+                                key={skill.name}
+                                className={`skill-card ${profile.game_tags.includes(skill.name) ? 'active' : ''}`}
+                                onClick={() => handleToggleTag(skill.name)}
                             >
-                                {skill}
+                                <span className="skill-icon">{skill.icon}</span>
+                                <span className="skill-name">{skill.name}</span>
+                                {profile.game_tags.includes(skill.name) && <div className="check-badge">✓</div>}
                             </button>
                         ))}
                     </div>
                 </section>
 
                 <section className="editor-section">
-                    <h2 className="section-title">Bộ sưu tập ảnh (Gallery)</h2>
+                    <div className="section-header-between">
+                        <h2 className="section-title">Album & Gallery (Tối đa 15)</h2>
+                        <span className="tag-count">{profile.gallery.length}/15</span>
+                    </div>
                     <div className="gallery-preview">
                         {profile.gallery && profile.gallery.map((url: string, index: number) => (
-                            <div key={index} className="gallery-item">
+                            <div key={index} className="gallery-item-wrapper">
                                 <img src={url} alt={`Gallery ${index}`} />
+                                <div className="gallery-actions">
+                                    <button
+                                        className="action-btn move-btn"
+                                        onClick={() => handleMoveItem(index, 'up')}
+                                        disabled={index === 0}
+                                    >
+                                        <ChevronUp size={14} />
+                                    </button>
+                                    <button
+                                        className="action-btn move-btn"
+                                        onClick={() => handleMoveItem(index, 'down')}
+                                        disabled={index === profile.gallery.length - 1}
+                                    >
+                                        <ChevronDown size={14} />
+                                    </button>
+                                    <button
+                                        className="action-btn remove-btn"
+                                        onClick={() => setProfile((p: any) => ({ ...p, gallery: p.gallery.filter((_: any, i: number) => i !== index) }))}
+                                    >
+                                        <X size={14} />
+                                    </button>
+                                </div>
                             </div>
                         ))}
+                        {profile.gallery.length < 15 && (
+                            <ImageUpload
+                                bucket="galleries"
+                                onUploadSuccess={(url) => setProfile((prev: any) => ({ ...prev, gallery: [...prev.gallery, url] }))}
+                                label=""
+                            />
+                        )}
                     </div>
-                    <ImageUpload
-                        bucket="galleries"
-                        onUploadSuccess={(url) => setProfile((prev: any) => ({ ...prev, gallery: [...prev.gallery, url] }))}
-                        label="Thêm ảnh vào bộ sưu tập"
-                    />
                 </section>
 
                 <div className="bottom-spacing" />

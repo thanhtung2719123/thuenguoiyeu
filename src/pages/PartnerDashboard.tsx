@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 import {
     TrendingUp,
     Users,
@@ -14,8 +15,36 @@ import './PartnerDashboard.css';
 
 const PartnerDashboard = () => {
     const { user } = useAuth();
-    const [isOnline, setIsOnline] = useState(true);
+    const [isOnline, setIsOnline] = useState(false);
+    const [fetching, setFetching] = useState(true);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!user) return;
+        const fetchStatus = async () => {
+            const { data } = await supabase
+                .from('partners')
+                .select('is_online')
+                .eq('id', user.uid)
+                .single();
+            if (data) setIsOnline(data.is_online);
+            setFetching(false);
+        };
+        fetchStatus();
+    }, [user]);
+
+    const handleToggleStatus = async () => {
+        const nextStatus = !isOnline;
+        setIsOnline(nextStatus);
+        if (user) {
+            await supabase
+                .from('partners')
+                .update({ is_online: nextStatus } as any)
+                .eq('id', user.uid);
+        }
+    };
+
+    if (fetching) return <div className="loading-state">Đang tải...</div>;
 
     return (
         <div className="partner-dashboard">
@@ -38,7 +67,7 @@ const PartnerDashboard = () => {
                             </span>
                             <button
                                 className={`toggle-switch ${isOnline ? 'on' : 'off'}`}
-                                onClick={() => setIsOnline(!isOnline)}
+                                onClick={handleToggleStatus}
                             >
                                 <div className="toggle-handle" />
                             </button>
