@@ -72,7 +72,7 @@ const Inbox = () => {
         if (!selectedChat) return;
 
         const fetchMessages = async () => {
-            const { data, error } = await supabase
+            const { data } = await supabase
                 .from('messages')
                 .select('*')
                 .or(`and(sender_id.eq.${user?.uid},receiver_id.eq.${selectedChat.otherId}),and(sender_id.eq.${selectedChat.otherId},receiver_id.eq.${user?.uid})`)
