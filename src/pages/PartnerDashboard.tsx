@@ -57,6 +57,7 @@ const PartnerDashboard = () => {
                                 <div className="toggle-handle" />
                             </button>
                         </div>
+                    </div>
                 </header>
 
                 {/* Stats Grid */}
