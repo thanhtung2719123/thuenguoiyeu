@@ -26,7 +26,7 @@ function App() {
             {/* Detailed Views */}
             <Route path="/partner/:id" element={<PartnerProfile />} />
             <Route path="/partner-dashboard" element={<PartnerDashboard />} />
-            <Route path="/partner-schedule" element={<EmptyPage title="Schedule" />} />
+            <Route path="/partner-schedule" element={<PartnerSchedule />} />
             <Route path="/partner-inbox" element={<EmptyPage title="Partner Messages" />} />
           </Route>
 
