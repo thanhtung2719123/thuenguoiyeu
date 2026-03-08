@@ -15,8 +15,15 @@ import {
     CreditCard,
     LogIn,
     Camera,
-    Clock
+    Camera,
+    Clock,
+    User as UserIcon,
+    MapPin,
+    AlignLeft,
+    Save,
+    Loader2
 } from 'lucide-react';
+import ImageUpload from '../components/ImageUpload';
 import './Profile.css';
 
 const Profile = () => {
@@ -25,7 +32,14 @@ const Profile = () => {
     const [profile, setProfile] = useState<any>(null);
     const [isOnline, setIsOnline] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [savingProfile, setSavingProfile] = useState(false);
     const [isPartner, setIsPartner] = useState(false);
+    const [formData, setFormData] = useState({
+        display_name: '',
+        bio: '',
+        location: '',
+        avatar_url: ''
+    });
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -44,6 +58,12 @@ const Profile = () => {
                 if (data) {
                     setProfile(data);
                     setIsPartner(data.is_partner);
+                    setFormData({
+                        display_name: data.display_name || '',
+                        bio: data.bio || '',
+                        location: data.location || '',
+                        avatar_url: data.avatar_url || ''
+                    });
 
                     if (data.is_partner) {
                         const { data: partnerData } = await supabase
@@ -66,6 +86,32 @@ const Profile = () => {
 
         fetchProfile();
     }, [user]);
+
+    const handleSaveProfile = async () => {
+        if (!user) return;
+        try {
+            setSavingProfile(true);
+            const { error } = await supabase
+                .from('profiles')
+                .update({
+                    display_name: formData.display_name,
+                    bio: formData.bio,
+                    location: formData.location,
+                    avatar_url: formData.avatar_url,
+                    updated_at: new Date().toISOString()
+                } as any)
+                .eq('id', user.uid);
+
+            if (error) throw error;
+            setProfile((prev: any) => ({ ...prev, ...formData }));
+            alert('Đã lưu thông tin cá nhân!');
+        } catch (err) {
+            console.error('Error saving profile:', err);
+            alert('Có lỗi xảy ra khi lưu thông tin.');
+        } finally {
+            setSavingProfile(false);
+        }
+    };
 
     const handleToggleStatus = async () => {
         const nextStatus = !isOnline;
@@ -124,32 +170,83 @@ const Profile = () => {
             <div className="profile-padding">
                 <h1 className="page-title">Tài khoản của tôi</h1>
 
-                {/* User Card */}
-                <div className="user-profile-card card glass">
-                    <div className="user-avatar-box" onClick={() => navigate('/edit-profile')}>
-                        <img src={profile?.avatar_url || user.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200"} alt="user" className="user-large-avatar" />
-                        <div className="edit-badge">
-                            <Camera size={14} />
+                {/* Editable User Profile Section */}
+                <section className="settings-section">
+                    <div className="section-header-row profile-editor-header">
+                        <h2 className="section-title">Sửa thông tin</h2>
+                        <button className="btn-icon btn-ghost pink-text" onClick={handleSaveProfile} disabled={savingProfile}>
+                            {savingProfile ? <Loader2 className="spinner" size={24} /> : <Save size={24} />}
+                        </button>
+                    </div>
+
+                    <div className="edit-profile-avatar-section">
+                        <div className="user-avatar-box large mx-auto">
+                            <img src={formData.avatar_url || user.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200"} alt="user" className="user-large-avatar" />
                         </div>
+                        <div className="text-center mt-3 mb-4">
+                            {profile?.is_verified ? (
+                                <div className="verification-status verified justify-center">
+                                    <ShieldCheck size={14} />
+                                    Đã xác minh danh tính (e-KYC)
+                                </div>
+                            ) : (
+                                <div className="verification-status unverified justify-center">
+                                    <ShieldCheck size={14} className="text-subtle" />
+                                    Chưa xác minh danh tính
+                                </div>
+                            )}
+                        </div>
+                        <ImageUpload
+                            bucket="avatars"
+                            onUploadSuccess={(url) => setFormData(prev => ({ ...prev, avatar_url: url }))}
+                            label="Thay đổi ảnh đại diện"
+                        />
                     </div>
-                    <div className="user-main-info">
-                        <h2 className="user-display-name">{profile?.display_name || user.displayName || 'Người dùng'}</h2>
-                        {profile?.is_verified ? (
-                            <div className="verification-status verified">
-                                <ShieldCheck size={14} />
-                                Đã xác minh danh tính (e-KYC)
-                            </div>
-                        ) : (
-                            <div className="verification-status unverified">
-                                <ShieldCheck size={14} className="text-subtle" />
-                                Chưa xác minh danh tính
-                            </div>
-                        )}
+
+                    <div className="input-group card glass no-margin">
+                        <section className="input-field">
+                            <label className="input-label">
+                                <UserIcon size={16} />
+                                <span>Tên hiển thị</span>
+                            </label>
+                            <input
+                                type="text"
+                                className="form-input"
+                                value={formData.display_name}
+                                onChange={e => setFormData(prev => ({ ...prev, display_name: e.target.value }))}
+                                placeholder="Nhập tên của bạn"
+                            />
+                        </section>
+
+                        <section className="input-field">
+                            <label className="input-label">
+                                <MapPin size={16} />
+                                <span>Vị trí</span>
+                            </label>
+                            <input
+                                type="text"
+                                className="form-input"
+                                value={formData.location}
+                                onChange={e => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                                placeholder="Ví dụ: Hà Nội, Việt Nam"
+                            />
+                        </section>
+
+                        <section className="input-field">
+                            <label className="input-label">
+                                <AlignLeft size={16} />
+                                <span>Tiểu sử</span>
+                            </label>
+                            <textarea
+                                className="form-textarea"
+                                value={formData.bio}
+                                onChange={e => setFormData(prev => ({ ...prev, bio: e.target.value }))}
+                                placeholder="Kể về bản thân bạn..."
+                                rows={4}
+                            />
+                        </section>
                     </div>
-                    <button className="btn-icon btn-ghost ml-auto" onClick={() => navigate('/edit-profile')}>
-                        <Settings size={20} className="text-subtle" />
-                    </button>
-                </div>
+                </section>
 
                 {/* Wallet Section */}
                 <section className="settings-section">
