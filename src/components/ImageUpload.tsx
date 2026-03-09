@@ -3,6 +3,7 @@ import imageCompression from 'browser-image-compression';
 import { Upload, X, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { usePartner } from '../context/PartnerContext';
 import './ImageUpload.css';
 
 interface ImageUploadProps {
@@ -15,6 +16,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ bucket, onUploadSuccess, labe
     const [uploading, setUploading] = useState(false);
     const [preview, setPreview] = useState<string | null>(null);
     const { user } = useAuth();
+    const { isPartnerMode } = usePartner();
 
     const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         try {
@@ -24,13 +26,9 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ bucket, onUploadSuccess, labe
                 if (!user) {
                     throw new Error('Bạn cần đăng nhập để thực hiện thao tác này.');
                 }
-                const { data: profile, error } = await supabase
-                    .from('profiles')
-                    .select('is_partner')
-                    .eq('id', user.uid)
-                    .single();
 
-                if (error || !profile?.is_partner) {
+                // Allow upload if they are viewing the partner dashboard (isPartnerMode)
+                if (!isPartnerMode) {
                     throw new Error('Chỉ đối tác mới có thể tải ảnh lên bộ sưu tập.');
                 }
             }
