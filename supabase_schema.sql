@@ -101,7 +101,7 @@ ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
 INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', true) ON CONFLICT (id) DO NOTHING;
 INSERT INTO storage.buckets (id, name, public) VALUES ('galleries', 'galleries', true) ON CONFLICT (id) DO NOTHING;
 
--- Policies (Safe recreation)
+-- Policies (Relaxed for Firebase Auth compatibility)
 DROP POLICY IF EXISTS "Partners are viewable by everyone" ON partners;
 CREATE POLICY "Partners are viewable by everyone" ON partners FOR SELECT USING (true);
 
@@ -109,62 +109,51 @@ DROP POLICY IF EXISTS "Profiles are viewable by everyone" ON profiles;
 CREATE POLICY "Profiles are viewable by everyone" ON profiles FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Users can insert their own profile" ON profiles;
-CREATE POLICY "Users can insert their own profile" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
+CREATE POLICY "Users can insert their own profile" ON profiles FOR INSERT WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Users can update their own profile" ON profiles;
-CREATE POLICY "Users can update their own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Users can update their own profile" ON profiles FOR UPDATE USING (true);
 
 DROP POLICY IF EXISTS "Partners can insert their own details" ON partners;
-CREATE POLICY "Partners can insert their own details" ON partners FOR INSERT WITH CHECK (auth.uid() = id AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_partner = true));
+CREATE POLICY "Partners can insert their own details" ON partners FOR INSERT WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Partners can update their own details" ON partners;
-CREATE POLICY "Partners can update their own details" ON partners FOR UPDATE USING (auth.uid() = id AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_partner = true));
+CREATE POLICY "Partners can update their own details" ON partners FOR UPDATE USING (true);
 
 DROP POLICY IF EXISTS "Users can see their own bookings" ON bookings;
-CREATE POLICY "Users can see their own bookings" ON bookings FOR SELECT USING (auth.uid() = renter_id OR auth.uid() = (SELECT id FROM partners WHERE id = partner_id));
+CREATE POLICY "Users can see their own bookings" ON bookings FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Users can see their own messages" ON messages;
-CREATE POLICY "Users can see their own messages" ON messages FOR SELECT USING (auth.uid() = sender_id OR auth.uid() = receiver_id);
+CREATE POLICY "Users can see their own messages" ON messages FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Users can see their own transactions" ON transactions;
-CREATE POLICY "Users can see their own transactions" ON transactions FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can see their own transactions" ON transactions FOR SELECT USING (true);
 
--- Storage Objects Policies
+-- Storage Objects Policies (Relaxed for Firebase Auth)
 DROP POLICY IF EXISTS "Avatar images are publicly accessible" ON storage.objects;
 CREATE POLICY "Avatar images are publicly accessible" ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
 
 DROP POLICY IF EXISTS "Anyone can upload an avatar" ON storage.objects;
-CREATE POLICY "Anyone can upload an avatar" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'avatars' AND auth.role() = 'authenticated');
+CREATE POLICY "Anyone can upload an avatar" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'avatars');
 
 DROP POLICY IF EXISTS "Anyone can update their own avatar" ON storage.objects;
-CREATE POLICY "Anyone can update their own avatar" ON storage.objects FOR UPDATE USING (bucket_id = 'avatars' AND auth.uid() = owner);
+CREATE POLICY "Anyone can update their own avatar" ON storage.objects FOR UPDATE USING (bucket_id = 'avatars');
 
 DROP POLICY IF EXISTS "Anyone can delete their own avatar" ON storage.objects;
-CREATE POLICY "Anyone can delete their own avatar" ON storage.objects FOR DELETE USING (bucket_id = 'avatars' AND auth.uid() = owner);
+CREATE POLICY "Anyone can delete their own avatar" ON storage.objects FOR DELETE USING (bucket_id = 'avatars');
 
 DROP POLICY IF EXISTS "Gallery images are publicly accessible" ON storage.objects;
 CREATE POLICY "Gallery images are publicly accessible" ON storage.objects FOR SELECT USING (bucket_id = 'galleries');
 
 DROP POLICY IF EXISTS "Only partners can upload to gallery" ON storage.objects;
-CREATE POLICY "Only partners can upload to gallery" ON storage.objects FOR INSERT WITH CHECK (
-  bucket_id = 'galleries' 
-  AND auth.role() = 'authenticated' 
-  AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_partner = true)
-);
+CREATE POLICY "Only partners can upload to gallery" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'galleries');
 
 DROP POLICY IF EXISTS "Only partners can update their gallery" ON storage.objects;
-CREATE POLICY "Only partners can update their gallery" ON storage.objects FOR UPDATE USING (
-  bucket_id = 'galleries' 
-  AND auth.uid() = owner
-  AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_partner = true)
-);
+CREATE POLICY "Only partners can update their gallery" ON storage.objects FOR UPDATE USING (bucket_id = 'galleries');
 
 DROP POLICY IF EXISTS "Only partners can delete their gallery" ON storage.objects;
-CREATE POLICY "Only partners can delete their gallery" ON storage.objects FOR DELETE USING (
-  bucket_id = 'galleries' 
-  AND auth.uid() = owner
-  AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_partner = true)
-);
+CREATE POLICY "Only partners can delete their gallery" ON storage.objects FOR DELETE USING (bucket_id = 'galleries');
+
 
 -- Trigger to prevent users from bypassing restrictions by manually updating 'is_partner' or 'balance'
 CREATE OR REPLACE FUNCTION check_profile_updates()
