@@ -103,9 +103,9 @@ const Profile = () => {
             if (error) throw error;
             setProfile((prev: any) => ({ ...prev, ...formData }));
             alert('Đã lưu thông tin cá nhân!');
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error saving profile:', err);
-            alert('Có lỗi xảy ra khi lưu thông tin.');
+            alert(`Có lỗi xảy ra khi lưu thông tin: ${err?.message || JSON.stringify(err)}`);
         } finally {
             setSavingProfile(false);
         }

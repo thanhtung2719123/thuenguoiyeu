@@ -128,7 +128,7 @@ const PartnerProfileEditor = () => {
                     avatar_url: profile.avatar_url,
                     province: profile.province,
                     gender: profile.gender,
-                    birthday: profile.birthday
+                    birthday: profile.birthday || null
                 } as any)
                 .eq('id', user.uid);
 
@@ -149,9 +149,9 @@ const PartnerProfileEditor = () => {
             if (partnerError) throw partnerError;
 
             navigate('/partner-dashboard');
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error saving profile:', err);
-            alert('Có lỗi xảy ra khi lưu thông tin.');
+            alert(`Có lỗi xảy ra khi lưu thông tin: ${err?.message || JSON.stringify(err)}`);
         } finally {
             setSaving(false);
         }
