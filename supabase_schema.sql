@@ -1,11 +1,27 @@
 -- Supabase SQL Schema for Rent-a-Date (Production Ready)
+-- FIXED FOR FIREBASE COMPATIBILITY: Uses TEXT instead of UUID for User IDs.
 
--- Enable UUID extension
+-- Enable UUID extension (Still needed for auto-generating IDs like Booking/Message IDs)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- ==========================================
+-- DANGER ZONE: DROP EXISTING TABLES
+-- Required to change primary key types from UUID to TEXT
+-- ==========================================
+DROP TABLE IF EXISTS transactions CASCADE;
+DROP TABLE IF EXISTS messages CASCADE;
+DROP TABLE IF EXISTS bookings CASCADE;
+DROP TABLE IF EXISTS partners CASCADE;
+DROP TABLE IF EXISTS profiles CASCADE;
+
+-- ==========================================
+-- RECREATE TABLES WITH 'TEXT' FOR USER IDs
+-- ==========================================
+
 -- Profiles Table (Base for all users)
-CREATE TABLE IF NOT EXISTS profiles (
-  id UUID PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
+-- Note: Removed 'REFERENCES auth.users' because Firebase manages the users.
+CREATE TABLE profiles (
+  id TEXT PRIMARY KEY,
   display_name TEXT,
   avatar_url TEXT,
   bio TEXT,
@@ -21,14 +37,9 @@ CREATE TABLE IF NOT EXISTS profiles (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Ensure all columns exist in profiles (in case table was created earlier)
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS province TEXT;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS gender TEXT;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS birthday DATE;
-
 -- Partners Table (Extension for partner users)
-CREATE TABLE IF NOT EXISTS partners (
-  id UUID PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
+CREATE TABLE partners (
+  id TEXT PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
   category TEXT,
   rating DECIMAL(3,2) DEFAULT 0,
   review_count INTEGER DEFAULT 0,
@@ -43,20 +54,11 @@ CREATE TABLE IF NOT EXISTS partners (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Ensure all columns exist in partners
-ALTER TABLE partners ADD COLUMN IF NOT EXISTS category TEXT;
-ALTER TABLE partners ADD COLUMN IF NOT EXISTS skills TEXT[] DEFAULT '{}';
-ALTER TABLE partners ADD COLUMN IF NOT EXISTS game_tags TEXT[] DEFAULT '{}';
-ALTER TABLE partners ADD COLUMN IF NOT EXISTS gallery TEXT[] DEFAULT '{}';
-ALTER TABLE partners ADD COLUMN IF NOT EXISTS price_per_hour DECIMAL(15,2);
-ALTER TABLE partners ADD COLUMN IF NOT EXISTS availability_status TEXT DEFAULT 'available';
-ALTER TABLE partners ADD COLUMN IF NOT EXISTS availability_hours JSONB DEFAULT '{}';
-
 -- Bookings Table
-CREATE TABLE IF NOT EXISTS bookings (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  renter_id UUID REFERENCES profiles(id),
-  partner_id UUID REFERENCES partners(id),
+CREATE TABLE bookings (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- Booking IDs remain UUID
+  renter_id TEXT REFERENCES profiles(id),
+  partner_id TEXT REFERENCES partners(id),
   event_date DATE NOT NULL,
   start_time TIME NOT NULL,
   duration_hours INTEGER NOT NULL,
@@ -67,22 +69,19 @@ CREATE TABLE IF NOT EXISTS bookings (
 );
 
 -- Messages Table
-CREATE TABLE IF NOT EXISTS messages (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  sender_id UUID REFERENCES profiles(id),
-  receiver_id UUID REFERENCES profiles(id),
+CREATE TABLE messages (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- Message IDs remain UUID
+  sender_id TEXT REFERENCES profiles(id),
+  receiver_id TEXT REFERENCES profiles(id),
   content TEXT NOT NULL,
   is_read BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Ensure receiver_id exists in messages
-ALTER TABLE messages ADD COLUMN IF NOT EXISTS receiver_id UUID REFERENCES profiles(id);
-
 -- Transactions Table (Wallet History)
-CREATE TABLE IF NOT EXISTS transactions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES profiles(id),
+CREATE TABLE transactions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- Transaction IDs remain UUID
+  user_id TEXT REFERENCES profiles(id),
   amount DECIMAL(15,2) NOT NULL,
   type TEXT NOT NULL, -- deposit, withdrawal, payment, earning
   description TEXT,
@@ -90,7 +89,9 @@ CREATE TABLE IF NOT EXISTS transactions (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Enable Row Level Security (RLS)
+-- ==========================================
+-- ROW LEVEL SECURITY (RLS)
+-- ==========================================
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE partners ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
@@ -154,14 +155,13 @@ CREATE POLICY "Only partners can update their gallery" ON storage.objects FOR UP
 DROP POLICY IF EXISTS "Only partners can delete their gallery" ON storage.objects;
 CREATE POLICY "Only partners can delete their gallery" ON storage.objects FOR DELETE USING (bucket_id = 'galleries');
 
-
 -- Trigger to prevent users from bypassing restrictions by manually updating 'is_partner' or 'balance'
 CREATE OR REPLACE FUNCTION check_profile_updates()
 RETURNS trigger AS $$
 BEGIN
   IF NEW.is_partner IS DISTINCT FROM OLD.is_partner OR NEW.balance IS DISTINCT FROM OLD.balance THEN
     -- If the role is just authenticated (a normal user), they cannot change these columns
-    IF current_setting('role') = 'authenticated' THEN
+    IF current_setting('role', true) = 'authenticated' THEN
       RAISE EXCEPTION 'Users cannot update their own balance or partner status';
     END IF;
   END IF;
@@ -174,5 +174,4 @@ CREATE TRIGGER tr_check_profile_updates
 BEFORE UPDATE ON profiles
 FOR EACH ROW
 EXECUTE FUNCTION check_profile_updates();
-
 
