@@ -174,7 +174,7 @@ const PartnerProfileEditor = () => {
                 <button className="back-btn" onClick={() => navigate(-1)}>
                     <ArrowLeft size={20} />
                 </button>
-                <h1 className="header-title">Chỉnh sửa hồ sơ Companion</h1>
+                <h1 className="header-title">Chỉnh sửa hồ sơ Đối tác</h1>
                 <button className="save-btn pink-text" onClick={handleSave} disabled={saving}>
                     {saving ? <Loader2 className="spinner" size={20} /> : <Save size={20} />}
                     <span>Lưu</span>
@@ -207,7 +207,7 @@ const PartnerProfileEditor = () => {
                                 type="text"
                                 value={profile.display_name}
                                 onChange={e => setProfile((prev: any) => ({ ...prev, display_name: e.target.value }))}
-                                placeholder="Biệt danh"
+                                placeholder="Biệt danh / Họ tên"
                             />
                         </div>
                         <div className="input-item">
@@ -254,7 +254,7 @@ const PartnerProfileEditor = () => {
                 </section>
 
                 <section className="editor-section">
-                    <h2 className="section-title">Giới thiệu ngắn (Bio)</h2>
+                    <h2 className="section-title">Giới thiệu bản thân</h2>
                     <div className="input-group card">
                         <div className="input-item multi-line">
                             <AlignLeft size={18} className="input-icon" />

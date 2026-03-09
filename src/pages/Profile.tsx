@@ -14,8 +14,6 @@ import {
     Repeat,
     CreditCard,
     LogIn,
-    Camera,
-    Camera,
     Clock,
     User as UserIcon,
     MapPin,
@@ -181,7 +179,7 @@ const Profile = () => {
 
                     <div className="edit-profile-avatar-section">
                         <div className="user-avatar-box large mx-auto">
-                            <img src={formData.avatar_url || user.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200"} alt="user" className="user-large-avatar" />
+                            <img src={formData.avatar_url || profile?.avatar_url || user.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200"} alt="user" className="user-large-avatar" />
                         </div>
                         <div className="text-center mt-3 mb-4">
                             {profile?.is_verified ? (
