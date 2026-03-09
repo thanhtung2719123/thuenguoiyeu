@@ -1,7 +1,10 @@
 -- Supabase SQL Schema for Rent-a-Date (Production Ready)
 
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 -- Profiles Table (Base for all users)
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
   id UUID PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
   display_name TEXT,
   avatar_url TEXT,
@@ -18,8 +21,13 @@ CREATE TABLE profiles (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Ensure all columns exist in profiles (in case table was created earlier)
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS province TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS gender TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS birthday DATE;
+
 -- Partners Table (Extension for partner users)
-CREATE TABLE partners (
+CREATE TABLE IF NOT EXISTS partners (
   id UUID PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
   category TEXT,
   rating DECIMAL(3,2) DEFAULT 0,
@@ -35,8 +43,17 @@ CREATE TABLE partners (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Ensure all columns exist in partners
+ALTER TABLE partners ADD COLUMN IF NOT EXISTS category TEXT;
+ALTER TABLE partners ADD COLUMN IF NOT EXISTS skills TEXT[] DEFAULT '{}';
+ALTER TABLE partners ADD COLUMN IF NOT EXISTS game_tags TEXT[] DEFAULT '{}';
+ALTER TABLE partners ADD COLUMN IF NOT EXISTS gallery TEXT[] DEFAULT '{}';
+ALTER TABLE partners ADD COLUMN IF NOT EXISTS price_per_hour DECIMAL(15,2);
+ALTER TABLE partners ADD COLUMN IF NOT EXISTS availability_status TEXT DEFAULT 'available';
+ALTER TABLE partners ADD COLUMN IF NOT EXISTS availability_hours JSONB DEFAULT '{}';
+
 -- Bookings Table
-CREATE TABLE bookings (
+CREATE TABLE IF NOT EXISTS bookings (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   renter_id UUID REFERENCES profiles(id),
   partner_id UUID REFERENCES partners(id),
@@ -50,7 +67,7 @@ CREATE TABLE bookings (
 );
 
 -- Messages Table
-CREATE TABLE messages (
+CREATE TABLE IF NOT EXISTS messages (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   sender_id UUID REFERENCES profiles(id),
   receiver_id UUID REFERENCES profiles(id),
@@ -59,8 +76,11 @@ CREATE TABLE messages (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Ensure receiver_id exists in messages
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS receiver_id UUID REFERENCES profiles(id);
+
 -- Transactions Table (Wallet History)
-CREATE TABLE transactions (
+CREATE TABLE IF NOT EXISTS transactions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES profiles(id),
   amount DECIMAL(15,2) NOT NULL,
@@ -81,37 +101,65 @@ ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
 INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', true) ON CONFLICT (id) DO NOTHING;
 INSERT INTO storage.buckets (id, name, public) VALUES ('galleries', 'galleries', true) ON CONFLICT (id) DO NOTHING;
 
--- Basic Policies (Public read for partners, private for everything else)
+-- Policies (Safe recreation)
+DROP POLICY IF EXISTS "Partners are viewable by everyone" ON partners;
 CREATE POLICY "Partners are viewable by everyone" ON partners FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Profiles are viewable by everyone" ON profiles;
 CREATE POLICY "Profiles are viewable by everyone" ON profiles FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Users can insert their own profile" ON profiles;
 CREATE POLICY "Users can insert their own profile" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Users can update their own profile" ON profiles;
 CREATE POLICY "Users can update their own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Partners can insert their own details" ON partners;
 CREATE POLICY "Partners can insert their own details" ON partners FOR INSERT WITH CHECK (auth.uid() = id AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_partner = true));
+
+DROP POLICY IF EXISTS "Partners can update their own details" ON partners;
 CREATE POLICY "Partners can update their own details" ON partners FOR UPDATE USING (auth.uid() = id AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_partner = true));
 
+DROP POLICY IF EXISTS "Users can see their own bookings" ON bookings;
 CREATE POLICY "Users can see their own bookings" ON bookings FOR SELECT USING (auth.uid() = renter_id OR auth.uid() = (SELECT id FROM partners WHERE id = partner_id));
+
+DROP POLICY IF EXISTS "Users can see their own messages" ON messages;
 CREATE POLICY "Users can see their own messages" ON messages FOR SELECT USING (auth.uid() = sender_id OR auth.uid() = receiver_id);
+
+DROP POLICY IF EXISTS "Users can see their own transactions" ON transactions;
 CREATE POLICY "Users can see their own transactions" ON transactions FOR SELECT USING (auth.uid() = user_id);
 
 -- Storage Objects Policies
--- Avatars bucket: publicly readable, authed users can insert/update/delete their own
+DROP POLICY IF EXISTS "Avatar images are publicly accessible" ON storage.objects;
 CREATE POLICY "Avatar images are publicly accessible" ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
+
+DROP POLICY IF EXISTS "Anyone can upload an avatar" ON storage.objects;
 CREATE POLICY "Anyone can upload an avatar" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'avatars' AND auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Anyone can update their own avatar" ON storage.objects;
 CREATE POLICY "Anyone can update their own avatar" ON storage.objects FOR UPDATE USING (bucket_id = 'avatars' AND auth.uid() = owner);
+
+DROP POLICY IF EXISTS "Anyone can delete their own avatar" ON storage.objects;
 CREATE POLICY "Anyone can delete their own avatar" ON storage.objects FOR DELETE USING (bucket_id = 'avatars' AND auth.uid() = owner);
 
--- Galleries bucket: publicly readable, ONLY partners can insert/update/delete their own
+DROP POLICY IF EXISTS "Gallery images are publicly accessible" ON storage.objects;
 CREATE POLICY "Gallery images are publicly accessible" ON storage.objects FOR SELECT USING (bucket_id = 'galleries');
+
+DROP POLICY IF EXISTS "Only partners can upload to gallery" ON storage.objects;
 CREATE POLICY "Only partners can upload to gallery" ON storage.objects FOR INSERT WITH CHECK (
   bucket_id = 'galleries' 
   AND auth.role() = 'authenticated' 
   AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_partner = true)
 );
+
+DROP POLICY IF EXISTS "Only partners can update their gallery" ON storage.objects;
 CREATE POLICY "Only partners can update their gallery" ON storage.objects FOR UPDATE USING (
   bucket_id = 'galleries' 
   AND auth.uid() = owner
   AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_partner = true)
 );
+
+DROP POLICY IF EXISTS "Only partners can delete their gallery" ON storage.objects;
 CREATE POLICY "Only partners can delete their gallery" ON storage.objects FOR DELETE USING (
   bucket_id = 'galleries' 
   AND auth.uid() = owner
@@ -137,4 +185,5 @@ CREATE TRIGGER tr_check_profile_updates
 BEFORE UPDATE ON profiles
 FOR EACH ROW
 EXECUTE FUNCTION check_profile_updates();
+
 
