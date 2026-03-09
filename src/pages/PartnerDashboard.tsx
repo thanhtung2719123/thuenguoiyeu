@@ -10,11 +10,13 @@ import {
     X,
     ChevronRight,
     Settings,
-    Loader2
+    Loader2,
+    Trash2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import ImageUpload from '../components/ImageUpload';
 import './PartnerDashboard.css';
 
 const formatCurrency = (amount: number) => {
@@ -31,6 +33,7 @@ const PartnerDashboard = () => {
     const [upcoming, setUpcoming] = useState<any[]>([]);
     const [stats, setStats] = useState({ earnings: 0, totalBookings: 0, rating: 0 });
     const [partnerName, setPartnerName] = useState('');
+    const [gallery, setGallery] = useState<string[]>([]);
 
     useEffect(() => {
         if (!user) return;
@@ -42,7 +45,7 @@ const PartnerDashboard = () => {
                 // Fetch partner profile & status
                 const { data: partnerData, error: partnerError } = await supabase
                     .from('partners')
-                    .select('is_online, rating, profiles(display_name)')
+                    .select('is_online, rating, gallery, profiles(display_name)')
                     .eq('id', user.uid)
                     .single();
 
@@ -50,6 +53,7 @@ const PartnerDashboard = () => {
                     setIsOnline(partnerData.is_online || false);
                     setStats(prev => ({ ...prev, rating: partnerData.rating || 0 }));
                     setPartnerName((partnerData.profiles as any)?.display_name || 'Đối tác');
+                    setGallery(partnerData.gallery || []);
                 }
 
                 if (partnerError && partnerError.code !== 'PGRST116') {
@@ -129,6 +133,40 @@ const PartnerDashboard = () => {
         } catch (error) {
             console.error('Error updating booking status', error);
             alert('Có lỗi xảy ra khi cập nhật.');
+        }
+    };
+
+    const handleAddGalleryImage = async (url: string) => {
+        if (!user) return;
+        try {
+            const newGallery = [...gallery, url];
+            const { error } = await supabase
+                .from('partners')
+                .update({ gallery: newGallery })
+                .eq('id', user.uid);
+
+            if (error) throw error;
+            setGallery(newGallery);
+        } catch (error) {
+            console.error('Error adding gallery image', error);
+            alert('Có lỗi khi lưu ảnh.');
+        }
+    };
+
+    const handleRemoveGalleryImage = async (indexToRemove: number) => {
+        if (!user) return;
+        try {
+            const newGallery = gallery.filter((_, idx) => idx !== indexToRemove);
+            const { error } = await supabase
+                .from('partners')
+                .update({ gallery: newGallery })
+                .eq('id', user.uid);
+
+            if (error) throw error;
+            setGallery(newGallery);
+        } catch (error) {
+            console.error('Error removing gallery image', error);
+            alert('Có lỗi khi xóa ảnh.');
         }
     };
 
@@ -239,7 +277,6 @@ const PartnerDashboard = () => {
                     )}
                 </section>
 
-                {/* Upcoming Schedule */}
                 <section className="dashboard-section">
                     <h2 className="section-title">Lịch trình sắp tới</h2>
                     {upcoming.length === 0 ? (
@@ -265,6 +302,37 @@ const PartnerDashboard = () => {
                                     </div>
                                 );
                             })}
+                        </div>
+                    )}
+                </section>
+
+                {/* Instant Gallery Upload */}
+                <section className="dashboard-section">
+                    <div className="section-header-row">
+                        <h2 className="section-title">Bộ sưu tập ảnh ({gallery.length}/15)</h2>
+                    </div>
+
+                    <div className="dashboard-gallery-grid">
+                        {gallery.map((imgUrl, idx) => (
+                            <div key={idx} className="dashboard-gallery-item">
+                                <img src={imgUrl} alt={`Gallery ${idx}`} />
+                                <button
+                                    className="remove-gallery-btn card glass"
+                                    onClick={() => handleRemoveGalleryImage(idx)}
+                                >
+                                    <Trash2 size={16} className="pink-text" />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+
+                    {gallery.length < 15 && (
+                        <div className="gallery-upload-wrapper mt-4">
+                            <ImageUpload
+                                bucket="galleries"
+                                onUploadSuccess={handleAddGalleryImage}
+                                label="Thêm ảnh mới vào bộ sưu tập"
+                            />
                         </div>
                     )}
                 </section>
