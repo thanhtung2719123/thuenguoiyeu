@@ -3,6 +3,7 @@ import {
     onAuthStateChanged,
     signInWithPopup,
     signOut,
+    signInAnonymously,
     User
 } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
@@ -12,6 +13,7 @@ interface AuthContextType {
     user: User | null;
     loading: boolean;
     signInWithGoogle: () => Promise<void>;
+    signInAsGuest: () => Promise<void>;
     logout: () => Promise<void>;
 }
 
@@ -53,6 +55,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const signInAsGuest = async () => {
+        try {
+            const result = await signInAnonymously(auth);
+            const user = result.user;
+
+            // Sync with Supabase profiles
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .upsert({
+                    id: user.uid,
+                    display_name: 'Khách',
+                    avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200',
+                    is_partner: false,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'id' });
+
+            if (profileError) {
+                console.error("Error syncing profile to Supabase", profileError);
+            }
+        } catch (error) {
+            console.error("Error signing in as guest", error);
+        }
+    };
+
     const logout = async () => {
         try {
             await signOut(auth);
@@ -62,7 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, signInWithGoogle, logout }}>
+        <AuthContext.Provider value={{ user, loading, signInWithGoogle, signInAsGuest, logout }}>
             {children}
         </AuthContext.Provider>
     );

@@ -77,10 +77,64 @@ ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
 
+-- Storage Buckets Setup
+INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', true) ON CONFLICT (id) DO NOTHING;
+INSERT INTO storage.buckets (id, name, public) VALUES ('galleries', 'galleries', true) ON CONFLICT (id) DO NOTHING;
+
 -- Basic Policies (Public read for partners, private for everything else)
 CREATE POLICY "Partners are viewable by everyone" ON partners FOR SELECT USING (true);
 CREATE POLICY "Profiles are viewable by everyone" ON profiles FOR SELECT USING (true);
+CREATE POLICY "Users can insert their own profile" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "Users can update their own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Partners can insert their own details" ON partners FOR INSERT WITH CHECK (auth.uid() = id AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_partner = true));
+CREATE POLICY "Partners can update their own details" ON partners FOR UPDATE USING (auth.uid() = id AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_partner = true));
+
 CREATE POLICY "Users can see their own bookings" ON bookings FOR SELECT USING (auth.uid() = renter_id OR auth.uid() = (SELECT id FROM partners WHERE id = partner_id));
 CREATE POLICY "Users can see their own messages" ON messages FOR SELECT USING (auth.uid() = sender_id OR auth.uid() = receiver_id);
 CREATE POLICY "Users can see their own transactions" ON transactions FOR SELECT USING (auth.uid() = user_id);
+
+-- Storage Objects Policies
+-- Avatars bucket: publicly readable, authed users can insert/update/delete their own
+CREATE POLICY "Avatar images are publicly accessible" ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
+CREATE POLICY "Anyone can upload an avatar" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'avatars' AND auth.role() = 'authenticated');
+CREATE POLICY "Anyone can update their own avatar" ON storage.objects FOR UPDATE USING (bucket_id = 'avatars' AND auth.uid() = owner);
+CREATE POLICY "Anyone can delete their own avatar" ON storage.objects FOR DELETE USING (bucket_id = 'avatars' AND auth.uid() = owner);
+
+-- Galleries bucket: publicly readable, ONLY partners can insert/update/delete their own
+CREATE POLICY "Gallery images are publicly accessible" ON storage.objects FOR SELECT USING (bucket_id = 'galleries');
+CREATE POLICY "Only partners can upload to gallery" ON storage.objects FOR INSERT WITH CHECK (
+  bucket_id = 'galleries' 
+  AND auth.role() = 'authenticated' 
+  AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_partner = true)
+);
+CREATE POLICY "Only partners can update their gallery" ON storage.objects FOR UPDATE USING (
+  bucket_id = 'galleries' 
+  AND auth.uid() = owner
+  AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_partner = true)
+);
+CREATE POLICY "Only partners can delete their gallery" ON storage.objects FOR DELETE USING (
+  bucket_id = 'galleries' 
+  AND auth.uid() = owner
+  AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_partner = true)
+);
+
+-- Trigger to prevent users from bypassing restrictions by manually updating 'is_partner' or 'balance'
+CREATE OR REPLACE FUNCTION check_profile_updates()
+RETURNS trigger AS $$
+BEGIN
+  IF NEW.is_partner IS DISTINCT FROM OLD.is_partner OR NEW.balance IS DISTINCT FROM OLD.balance THEN
+    -- If the role is just authenticated (a normal user), they cannot change these columns
+    IF current_setting('role') = 'authenticated' THEN
+      RAISE EXCEPTION 'Users cannot update their own balance or partner status';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS tr_check_profile_updates ON profiles;
+CREATE TRIGGER tr_check_profile_updates
+BEFORE UPDATE ON profiles
+FOR EACH ROW
+EXECUTE FUNCTION check_profile_updates();
+

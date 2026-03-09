@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import './Login.css';
 
 const Login = () => {
-    const { signInWithGoogle, user } = useAuth();
+    const { signInWithGoogle, signInAsGuest, user } = useAuth();
     const navigate = useNavigate();
 
     if (user) {
@@ -26,6 +26,9 @@ const Login = () => {
                     <button className="google-login-btn" onClick={signInWithGoogle}>
                         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
                         <span>Đăng nhập với Google</span>
+                    </button>
+                    <button className="guest-login-btn btn btn-outline" onClick={signInAsGuest} style={{ marginTop: '12px', width: '100%', justifyContent: 'center', borderColor: 'rgba(255, 255, 255, 0.2)', color: 'white' }}>
+                        <span>Tiếp tục dưới dạng Khách</span>
                     </button>
                 </div>
 

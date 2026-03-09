@@ -1,58 +1,154 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
 import {
     TrendingUp,
     Users,
     DollarSign,
     Clock,
     Bell,
+    MapPin,
+    Check,
+    X,
+    ChevronRight,
     Settings,
-    Info
+    Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 import './PartnerDashboard.css';
+
+const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+};
 
 const PartnerDashboard = () => {
     const { user } = useAuth();
-    const [isOnline, setIsOnline] = useState(false);
-    const [fetching, setFetching] = useState(true);
     const navigate = useNavigate();
+
+    const [isOnline, setIsOnline] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [requests, setRequests] = useState<any[]>([]);
+    const [upcoming, setUpcoming] = useState<any[]>([]);
+    const [stats, setStats] = useState({ earnings: 0, totalBookings: 0, rating: 0 });
+    const [partnerName, setPartnerName] = useState('');
 
     useEffect(() => {
         if (!user) return;
-        const fetchStatus = async () => {
-            const { data } = await supabase
-                .from('partners')
-                .select('is_online')
-                .eq('id', user.uid)
-                .single();
-            if (data) setIsOnline(data.is_online);
-            setFetching(false);
+
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+
+                // Fetch partner profile & status
+                const { data: partnerData, error: partnerError } = await supabase
+                    .from('partners')
+                    .select('is_online, rating, profiles(display_name)')
+                    .eq('id', user.uid)
+                    .single();
+
+                if (partnerData) {
+                    setIsOnline(partnerData.is_online || false);
+                    setStats(prev => ({ ...prev, rating: partnerData.rating || 0 }));
+                    setPartnerName((partnerData.profiles as any)?.display_name || 'Đối tác');
+                }
+
+                if (partnerError && partnerError.code !== 'PGRST116') {
+                    console.error('Error fetching partner data:', partnerError);
+                }
+
+                // Fetch Bookings (Pending & Confirmed)
+                const { data: bookingsData, error: bookingsError } = await supabase
+                    .from('bookings')
+                    .select('*, profiles!renter_id(display_name, avatar_url, location)')
+                    .eq('partner_id', user.uid)
+                    .order('event_date', { ascending: true })
+                    .order('start_time', { ascending: true });
+
+                if (bookingsError) {
+                    console.error('Error fetching bookings:', bookingsError);
+                } else if (bookingsData) {
+                    const pending = bookingsData.filter(b => b.status === 'pending');
+                    const confirmed = bookingsData.filter(b => b.status === 'confirmed');
+                    const completed = bookingsData.filter(b => b.status === 'completed');
+
+                    setRequests(pending);
+                    setUpcoming(confirmed);
+
+                    const totalEarnings = completed.reduce((sum, b) => sum + (b.total_price || 0), 0);
+                    setStats(prev => ({
+                        ...prev,
+                        earnings: totalEarnings,
+                        totalBookings: completed.length + confirmed.length
+                    }));
+                }
+            } catch (error) {
+                console.error('Dashboard data fetch error:', error);
+            } finally {
+                setLoading(false);
+            }
         };
-        fetchStatus();
+
+        fetchData();
     }, [user]);
 
-    const handleToggleStatus = async () => {
-        const nextStatus = !isOnline;
-        setIsOnline(nextStatus);
-        if (user) {
-            await supabase
-                .from('partners')
-                .update({ is_online: nextStatus } as any)
-                .eq('id', user.uid);
+    const toggleOnlineStatus = async () => {
+        if (!user) return;
+        const newStatus = !isOnline;
+        setIsOnline(nextStatus => !nextStatus); // Temporary UI feedback
+
+        const { error } = await supabase
+            .from('partners')
+            .update({ is_online: newStatus })
+            .eq('id', user.uid);
+
+        if (error) {
+            setIsOnline(prev => !prev); // Revert UI
+            console.error('Error updating status', error);
         }
     };
 
-    if (fetching) return <div className="loading-state">Đang tải...</div>;
+    const handleUpdateBookingStatus = async (bookingId: string, newStatus: string) => {
+        try {
+            const { error } = await supabase
+                .from('bookings')
+                .update({ status: newStatus })
+                .eq('id', bookingId);
+
+            if (error) throw error;
+
+            // Remove from requests if handled
+            setRequests(prev => prev.filter(req => req.id !== bookingId));
+
+            // Move to upcoming if accepted
+            if (newStatus === 'confirmed') {
+                const acceptedBooking = requests.find(req => req.id === bookingId);
+                if (acceptedBooking) {
+                    setUpcoming(prev => [...prev, { ...acceptedBooking, status: 'confirmed' }]);
+                }
+            }
+        } catch (error) {
+            console.error('Error updating booking status', error);
+            alert('Có lỗi xảy ra khi cập nhật.');
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="partner-dashboard">
+                <div className="dashboard-padding flex-center" style={{ height: '50vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <Loader2 className="spinner" size={32} />
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="partner-dashboard">
             <div className="dashboard-padding">
                 <header className="dashboard-header">
                     <div className="header-left">
-                        <h1 className="page-title">Bảng điều khiển Đối tác</h1>
-                        <p className="text-subtle">Chào mừng trở lại, {user?.displayName || 'bạn'}!</p>
+                        <h1 className="page-title">Bảng điều khiển</h1>
+                        <p className="text-subtle">Chào mừng trở lại, {partnerName}!</p>
                     </div>
                     <div className="header-actions">
                         <button
@@ -67,7 +163,7 @@ const PartnerDashboard = () => {
                             </span>
                             <button
                                 className={`toggle-switch ${isOnline ? 'on' : 'off'}`}
-                                onClick={handleToggleStatus}
+                                onClick={toggleOnlineStatus}
                             >
                                 <div className="toggle-handle" />
                             </button>
@@ -79,17 +175,17 @@ const PartnerDashboard = () => {
                 <div className="stats-grid">
                     <div className="stat-card card glass">
                         <div className="stat-icon-bg green"><DollarSign size={20} /></div>
-                        <div className="stat-value">0₫</div>
-                        <div className="stat-label">Tuần này</div>
+                        <div className="stat-value">{formatCurrency(stats.earnings)}</div>
+                        <div className="stat-label">Doanh thu</div>
                     </div>
                     <div className="stat-card card glass">
                         <div className="stat-icon-bg blue"><Users size={20} /></div>
-                        <div className="stat-value">0</div>
+                        <div className="stat-value">{stats.totalBookings}</div>
                         <div className="stat-label">Tổng lượt đặt</div>
                     </div>
                     <div className="stat-card card glass">
                         <div className="stat-icon-bg purple"><TrendingUp size={20} /></div>
-                        <div className="stat-value">0.0</div>
+                        <div className="stat-value">{stats.rating.toFixed(1)}</div>
                         <div className="stat-label">Đánh giá</div>
                     </div>
                 </div>
@@ -98,38 +194,86 @@ const PartnerDashboard = () => {
                 <section className="dashboard-section">
                     <div className="section-header-row">
                         <h2 className="section-title">Lời mời mới</h2>
-                        <Bell size={20} className="pink-text" />
+                        {requests.length > 0 && <Bell size={20} className="pink-text" />}
                     </div>
 
-                    <div className="requests-list">
-                        <div className="empty-state-card card">
-                            <div className="empty-icon-wrapper">
-                                <Info size={24} className="text-subtle" />
-                            </div>
-                            <p className="empty-text">Chưa có lời mời mới nào.</p>
-                            <p className="empty-subtext">Hoàn thiện hồ sơ để thu hút khách hàng hơn!</p>
+                    {requests.length === 0 ? (
+                        <div className="empty-state text-subtle">Không có lời mời nào mới.</div>
+                    ) : (
+                        <div className="requests-list">
+                            {requests.map(req => (
+                                <div key={req.id} className="request-card card glass">
+                                    <div className="request-user">
+                                        <img src={(req.profiles as any)?.avatar_url || 'https://via.placeholder.com/150'} alt={(req.profiles as any)?.display_name} className="request-avatar" />
+                                        <div className="request-main-info">
+                                            <h3 className="request-user-name">{(req.profiles as any)?.display_name || 'Khách hàng'}</h3>
+                                            <div className="request-purpose pink-text">Yêu cầu dịch vụ</div>
+                                        </div>
+                                        <div className="request-price">{formatCurrency(req.total_price)}</div>
+                                    </div>
+
+                                    <div className="request-details">
+                                        <div className="detail-item">
+                                            <Clock size={14} />
+                                            {req.event_date} {req.start_time} ({req.duration_hours} giờ)
+                                        </div>
+                                        <div className="detail-item">
+                                            <MapPin size={14} />
+                                            {(req.profiles as any)?.location || 'Chưa cập nhật'}
+                                        </div>
+                                    </div>
+
+                                    <div className="request-actions">
+                                        <button className="btn btn-outline flex-1 decline-btn" onClick={() => handleUpdateBookingStatus(req.id, 'cancelled')}>
+                                            <X size={18} />
+                                            Từ chối
+                                        </button>
+                                        <button className="btn btn-primary flex-1 accept-btn" onClick={() => handleUpdateBookingStatus(req.id, 'confirmed')}>
+                                            <Check size={18} />
+                                            Chấp nhận
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                    </div>
+                    )}
                 </section>
 
                 {/* Upcoming Schedule */}
                 <section className="dashboard-section">
-                    <div className="section-header-row">
-                        <h2 className="section-title">Lịch trình sắp tới</h2>
-                        <button className="btn-ghost pink-text font-medium" onClick={() => navigate('/partner-schedule')}>
-                            Xem tất cả
-                        </button>
-                    </div>
-                    <div className="schedule-list card">
-                        <div className="empty-schedule text-subtle">
-                            <Clock size={20} />
-                            <span>Bạn chưa có lịch trình nào sắp tới.</span>
+                    <h2 className="section-title">Lịch trình sắp tới</h2>
+                    {upcoming.length === 0 ? (
+                        <div className="empty-state text-subtle">Chưa có lịch trình sắp tới.</div>
+                    ) : (
+                        <div className="schedule-list card glass">
+                            {upcoming.map(item => {
+                                const eventDate = new Date(item.event_date);
+                                const day = eventDate.getDate();
+                                const monthNames = ["Th1", "Th2", "Th3", "Th4", "Th5", "Th6", "Th7", "Th8", "Th9", "Th10", "Th11", "Th12"];
+                                const month = monthNames[eventDate.getMonth()];
+                                return (
+                                    <div key={item.id} className="schedule-item">
+                                        <div className="schedule-date">
+                                            <div className="day">{day}</div>
+                                            <div className="month">{month}</div>
+                                        </div>
+                                        <div className="schedule-info">
+                                            <div className="schedule-title">Gặp {(item.profiles as any)?.display_name || 'Khách'}</div>
+                                            <div className="schedule-time text-subtle">{item.start_time} ({item.duration_hours} giờ)</div>
+                                        </div>
+                                        <ChevronRight size={18} className="text-subtle" />
+                                    </div>
+                                );
+                            })}
                         </div>
-                    </div>
+                    )}
                 </section>
+
+                <div className="bottom-spacing" />
             </div>
         </div>
     );
 };
 
 export default PartnerDashboard;
+
