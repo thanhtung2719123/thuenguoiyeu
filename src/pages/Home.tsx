@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import SearchBar from '../components/SearchBar';
 import CategoryPills from '../components/CategoryPills';
 import ProfileCard from '../components/ProfileCard';
+import { Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import './Home.css';
 
@@ -71,6 +72,7 @@ const Home = () => {
 
                     {loading ? (
                         <div className="loading-state">
+                            <Loader2 className="spinner" size={32} />
                             <p className="text-subtle">Đang tải danh sách...</p>
                         </div>
                     ) : partners.length > 0 ? (

@@ -128,23 +128,24 @@ const PartnerProfileEditor = () => {
                     avatar_url: profile.avatar_url,
                     province: profile.province,
                     gender: profile.gender,
+                    is_partner: true, // Ensure they are marked as partner if they edit this
                     birthday: profile.birthday || null
                 } as any)
                 .eq('id', user.uid);
 
             if (profileError) throw profileError;
 
-            // Update Partner
+            // Upsert Partner (ensure record exists)
             const { error: partnerError } = await supabase
                 .from('partners')
-                .update({
+                .upsert({
+                    id: user.uid,
                     location: profile.location,
                     price_per_hour: profile.price_per_hour,
                     game_tags: profile.game_tags,
                     gallery: profile.gallery.slice(0, 15),
                     updated_at: new Date().toISOString()
-                } as any)
-                .eq('id', user.uid);
+                } as any);
 
             if (partnerError) throw partnerError;
 
@@ -182,6 +183,9 @@ const PartnerProfileEditor = () => {
             </header>
 
             <div className="editor-content scroll-y">
+                <div className="status-reminder glass">
+                    <p>💡 <strong>Lưu ý:</strong> Để hiển thị trên trang chủ cho người thuê, hãy bật trạng thái <strong>"Đang hoạt động"</strong> trong <span className="link-text" onClick={() => navigate('/partner-dashboard')}>Bảng điều khiển</span> sau khi lưu.</p>
+                </div>
                 <section className="editor-section">
                     <h2 className="section-title">Ảnh đại diện</h2>
                     <div className="avatar-edit-container">

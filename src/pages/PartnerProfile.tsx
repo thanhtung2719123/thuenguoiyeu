@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     ArrowLeft,
@@ -8,58 +8,80 @@ import {
     ShieldCheck,
     MessageCircle,
     Calendar,
-    Info
+    Info,
+    Loader2
 } from 'lucide-react';
 import BookingModal from '../components/BookingModal';
+import { supabase } from '../lib/supabase';
 import './PartnerProfile.css';
-
-const MOCK_PARTNERS = [
-    {
-        id: 1,
-        name: 'Linh Nguyễn',
-        age: 24,
-        rating: 4.9,
-        reviews: [
-            { id: 101, user: 'Anh Tuấn', rating: 5, comment: 'Linh là một người bạn đi cà phê tuyệt vời! Rất lịch sự và chụp ảnh cực đẹp.', date: '2 ngày trước' },
-            { id: 102, user: 'Minh Hiếu', rating: 4, comment: 'Rất chuyên nghiệp, rất nên đặt cho các sự kiện xã hội.', date: '1 tuần trước' }
-        ],
-        distance: '2.4 km',
-        price: 350000,
-        imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800',
-        isVerified: true,
-        bio: "Chào bạn! Mình là Linh, một nhiếp ảnh gia tự do và blogger phong cách sống. Mình yêu thích khám phá những quán cà phê ẩn mình ở Hà Nội và chụp những bức ảnh đẹp. Mình thông thạo tiếng Anh và có thể giúp bạn tìm những địa điểm thú vị nhất trong thành phố. Rất mong được gặp bạn!",
-        skills: ['Bạn cà phê', 'Thông thạo tiếng Anh', 'Nhiếp ảnh', 'Nghi thức đám cưới'],
-        vibePhotos: [
-            'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=400',
-            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400'
-        ]
-    },
-    {
-        id: 2,
-        name: 'Minh Trần',
-        age: 26,
-        rating: 4.8,
-        reviews: [],
-        distance: '3.1 km',
-        price: 450000,
-        imageUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=800',
-        isVerified: true,
-        bio: "Hướng dẫn viên chuyên nghiệp và đối tác sự kiện doanh nghiệp. Mình chuyên về nghi thức ăn uống cao cấp và tham quan thành phố.",
-        skills: ['Hướng dẫn địa phương', 'Ăn uống cao cấp', 'Lái xe', 'Sự kiện doanh nghiệp'],
-        vibePhotos: []
-    }
-];
 
 const PartnerProfile = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const partner = MOCK_PARTNERS.find(p => p.id === Number(id)) || MOCK_PARTNERS[0];
+    const [partner, setPartner] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
     const [isBookingOpen, setIsBookingOpen] = useState(false);
+
+    useEffect(() => {
+        const fetchPartner = async () => {
+            if (!id) return;
+            try {
+                setLoading(true);
+                const { data, error } = await supabase
+                    .from('partners')
+                    .select('*, profiles(*)')
+                    .eq('id', id)
+                    .single();
+
+                if (error) throw error;
+                if (data) {
+                    const formattedPartner = {
+                        id: data.id,
+                        name: data.profiles?.display_name || 'Người dùng ẩn danh',
+                        age: data.profiles?.birthday ? new Date().getFullYear() - new Date(data.profiles.birthday).getFullYear() : 20,
+                        rating: Number(data.rating) || 0,
+                        reviews: [], // Reviews table not yet fully integrated for querying here
+                        distance: data.profiles?.province || data.location || 'Hà Nội',
+                        price: data.price_per_hour || 0,
+                        imageUrl: data.profiles?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800',
+                        isVerified: data.profiles?.is_verified || false,
+                        bio: data.profiles?.bio || "Chưa có giới thiệu.",
+                        skills: data.game_tags || [],
+                        vibePhotos: data.gallery || []
+                    };
+                    setPartner(formattedPartner);
+                }
+            } catch (err) {
+                console.error('Error fetching partner:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPartner();
+    }, [id]);
 
     const handleConfirmBooking = () => {
         setIsBookingOpen(false);
         navigate('/bookings');
     };
+
+    if (loading) {
+        return (
+            <div className="profile-page flex-center" style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <Loader2 className="spinner" size={32} />
+            </div>
+        );
+    }
+
+    if (!partner) {
+        return (
+            <div className="profile-page flex-center" style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '1rem' }}>
+                <p>Không tìm thấy thông tin đối tác.</p>
+                <button className="btn btn-outline" onClick={() => navigate(-1)}>Quay lại</button>
+            </div>
+        );
+    }
 
     return (
         <div className="profile-page">
@@ -81,7 +103,7 @@ const PartnerProfile = () => {
                         </h1>
                         <div className="location-info text-subtle">
                             <MapPin size={16} />
-                            {partner.distance} away • Hanoi, Vietnam
+                            {partner.distance}
                         </div>
                     </div>
                     <div className="rating-box">
@@ -98,7 +120,7 @@ const PartnerProfile = () => {
                     <div className="stat-card">
                         <ShieldCheck size={20} className="stat-icon pink" />
                         <div className="stat-label">Danh tính</div>
-                        <div className="stat-value">Đã xác minh</div>
+                        <div className="stat-value">{partner.isVerified ? 'Đã xác minh' : 'Chưa xác minh'}</div>
                     </div>
                     <div className="stat-card">
                         <MessageCircle size={20} className="stat-icon pink" />
@@ -120,24 +142,24 @@ const PartnerProfile = () => {
 
                 {/* Skills Section */}
                 <section className="profile-section">
-                    <h2 className="section-title">Kỹ năng chuyên môn</h2>
+                    <h2 className="section-title">Thẻ Game & Kỹ năng</h2>
                     <div className="skills-grid">
-                        {partner.skills.map(skill => (
+                        {partner.skills.length > 0 ? partner.skills.map((skill: string) => (
                             <div key={skill} className="skill-item card">
                                 <CheckCircle size={14} className="pink" />
                                 {skill}
                             </div>
-                        ))}
+                        )) : <p className="text-subtle">Chưa cập nhật thẻ game.</p>}
                     </div>
                 </section>
 
-                {/* Vibe Photos */}
+                {/* Gallery Photos */}
                 {partner.vibePhotos.length > 0 && (
                     <section className="profile-section">
                         <h2 className="section-title">Bộ sưu tập</h2>
                         <div className="vibe-gallery">
-                            {partner.vibePhotos.map((url, idx) => (
-                                <img key={idx} src={url} alt="vibe" className="vibe-img" />
+                            {partner.vibePhotos.map((url: string, idx: number) => (
+                                <img key={idx} src={url} alt="gallery" className="vibe-img" />
                             ))}
                         </div>
                     </section>
@@ -151,7 +173,7 @@ const PartnerProfile = () => {
                     </div>
                     {partner.reviews.length > 0 ? (
                         <div className="reviews-list">
-                            {partner.reviews.map(review => (
+                            {partner.reviews.map((review: any) => (
                                 <div key={review.id} className="review-card card">
                                     <div className="review-header">
                                         <span className="reviewer-name">{review.user}</span>
