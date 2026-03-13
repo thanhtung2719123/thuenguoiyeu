@@ -12,12 +12,14 @@ import {
     Loader2
 } from 'lucide-react';
 import BookingModal from '../components/BookingModal';
+import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import './PartnerProfile.css';
 
 const PartnerProfile = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [partner, setPartner] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isBookingOpen, setIsBookingOpen] = useState(false);
@@ -61,9 +63,35 @@ const PartnerProfile = () => {
         fetchPartner();
     }, [id]);
 
-    const handleConfirmBooking = () => {
-        setIsBookingOpen(false);
-        navigate('/bookings');
+    const handleConfirmBooking = async (bookingData: any) => {
+        if (!user) {
+            alert('Vui lòng đăng nhập để đặt lịch!');
+            navigate('/login');
+            return;
+        }
+
+        try {
+            const { error } = await supabase
+                .from('bookings')
+                .insert({
+                    renter_id: user.uid,
+                    partner_id: id,
+                    event_date: bookingData.date,
+                    start_time: bookingData.time,
+                    duration_hours: bookingData.duration,
+                    total_price: bookingData.totalPrice,
+                    status: 'pending'
+                });
+
+            if (error) throw error;
+
+            setIsBookingOpen(false);
+            // Redirect to chat after booking
+            navigate(`/inbox?partnerId=${id}`);
+        } catch (err) {
+            console.error('Error confirming booking:', err);
+            alert('Có lỗi xảy ra khi đặt lịch. Vui lòng thử lại sau.');
+        }
     };
 
     if (loading) {

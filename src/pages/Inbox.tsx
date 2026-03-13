@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Search, Send, ShieldCheck, MoreVertical, LogIn } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -6,6 +7,9 @@ import './Inbox.css';
 
 const Inbox = () => {
     const { user, signInWithGoogle } = useAuth();
+    const [searchParams] = useSearchParams();
+    const partnerIdParam = searchParams.get('partnerId');
+
     const [selectedChat, setSelectedChat] = useState<any>(null);
     const [chats, setChats] = useState<any[]>([]);
     const [messages, setMessages] = useState<any[]>([]);
@@ -53,10 +57,19 @@ const Inbox = () => {
                             name: otherParty?.display_name || 'Người dùng ẩn danh',
                             avatar: otherParty?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800',
                             status: b.status === 'confirmed' ? 'Đã xác nhận' : 'Đang chờ',
-                            otherId: otherParty?.id
+                            otherId: otherParty?.id,
+                            partnerId: b.partner_id
                         };
                     });
                     setChats(formattedChats);
+
+                    // Auto-select chat if partnerId is in URL
+                    if (partnerIdParam) {
+                        const autoChat = formattedChats.find(c => c.partnerId === partnerIdParam);
+                        if (autoChat) {
+                            setSelectedChat(autoChat);
+                        }
+                    }
                 }
             } catch (err) {
                 console.error('Error fetching chats:', err);
@@ -66,7 +79,7 @@ const Inbox = () => {
         };
 
         fetchChats();
-    }, [user]);
+    }, [user, partnerIdParam]);
 
     useEffect(() => {
         if (!selectedChat) return;
