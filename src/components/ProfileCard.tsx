@@ -34,7 +34,7 @@ const ProfileCard = ({
             <div className="profile-image-wrapper">
                 <img src={imageUrl} alt={name} className="profile-image" />
                 <div className="price-badge glass">
-                    <span className="price-amount">{price.toLocaleString('vi-VN')}₫</span>
+                    <span className="price-amount">{(price ?? 0).toLocaleString('vi-VN')}₫</span>
                     <span className="price-unit">/giờ</span>
                 </div>
                 <button className="favorite-btn glass">

@@ -200,7 +200,7 @@ const PartnerProfile = () => {
             {/* Sticky Booking Bar */}
             <div className="booking-bar glass">
                 <div className="price-info">
-                    <div className="price-amount-large">{partner.price.toLocaleString('vi-VN')}₫</div>
+                    <div className="price-amount-large">{(partner.price ?? 0).toLocaleString('vi-VN')}₫</div>
                     <div className="price-label text-subtle">mỗi giờ</div>
                 </div>
                 <button

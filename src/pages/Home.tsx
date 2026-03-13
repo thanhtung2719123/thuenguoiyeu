@@ -29,7 +29,7 @@ const Home = () => {
                         rating: Number(p.rating),
                         reviews: p.review_count,
                         distance: p.profiles?.province || p.location || 'Hà Nội',
-                        price: p.price_per_hour,
+                        price: p.price_per_hour || 0,
                         imageUrl: p.profiles?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800',
                         isVerified: p.profiles?.is_verified || false,
                         tags: p.game_tags || [],
