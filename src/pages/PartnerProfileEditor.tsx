@@ -143,8 +143,7 @@ const PartnerProfileEditor = () => {
                     location: profile.location,
                     price_per_hour: profile.price_per_hour,
                     game_tags: profile.game_tags,
-                    gallery: profile.gallery.slice(0, 15),
-                    updated_at: new Date().toISOString()
+                    gallery: profile.gallery.slice(0, 15)
                 } as any);
 
             if (partnerError) throw partnerError;
